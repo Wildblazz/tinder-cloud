@@ -45,6 +45,10 @@ The system will implement these key dating platform capabilities:
 
 - [Link to architecture documentation](docs/architecture/high-level.md)
 
+### Local start
+* Create `.env` file in the 'deploy' directory. Use `.env-example` as a reference
+* From directory 'deploy' run command: `docker compose --env-file .env up` to start DBs, KeyCloak, Kafka, etc
+
 Shield: [![CC BY-NC 4.0][cc-by-nc-shield]][cc-by-nc]
 
 This work is licensed under a

@@ -1,0 +1,81 @@
+cloud-architecture-diagram
+
+Kubernetes Cluster [icon: k8s-cluster] {
+  API Gateway & Routing  [icon: nginx] {
+    NGINX Ingress Controller [icon:k8s-ingress]
+  }
+
+  Storage & Database [icon: database] {
+    PostgreSQL [icon: postgresql]
+    MongoDB [icon: mongodb]
+    Redis 1 [icon: redis]
+    Redis  [icon: redis]
+  }
+
+  Auth Service [icon: keycloak] {
+    Auth Pod [icon: k8s-pod]
+    Auth Db [icon:database]
+          }
+
+  Profile Service [icon: user] {
+    Profile Pod [icon: k8s-pod]
+    Profile Pod 2 [icon:k8s-pod]
+  }
+
+  Like Service [icon: user] {
+    Like Pod [icon: k8s-pod]
+    Like Pod 2 [icon:k8s-pod]
+  }
+
+  Match Service [icon: heart] {
+    Match Pod [icon: k8s-pod]
+    Match Pod 2 [icon:k8s-pod]
+  }
+
+    Event Processing [icon: message-square] {
+    Kafka [icon: kafka]
+  }
+
+  Recommendation Service  [icon: search] {
+    Recommendation Pod 1 [icon:k8s-pod]
+    Recommendation Pod 2 [icon:k8s-pod]
+  }
+}
+
+//AWS
+CDN [icon: aws-cloudfront]
+S3 Storage [icon: aws-s3, label: "S3/MinIO"]
+
+User [icon:user]
+Http [icon: network-switch]
+
+
+// Http Connections
+User > NGINX Ingress Controller
+NGINX Ingress Controller > Auth Service: Auth
+API Gateway & Routing > Match Service
+API Gateway & Routing > Recommendation Service
+API Gateway & Routing > Profile Service
+API Gateway & Routing > Like Service
+
+// Http Response
+User < Http < Like Service
+User < Http < Profile Service
+User < Http < Match Service
+User < Http < Recommendation Service
+
+// DB connections
+Auth Pod <> Auth Db: UserInfo management
+Redis 1 <> MongoDB
+Redis <> PostgreSQL
+Profile Service <> Redis <> PostgreSQL
+Match Service  <> PostgreSQL
+Like Service <> PostgreSQL
+Recommendation Service <> Redis 1
+
+// Storage Connection
+Profile Service <> S3 Storage
+User <> CDN <> S3 Storage
+
+// Events
+Event Processing <> Auth Service, Match Service, Profile Service, Recommendation Service

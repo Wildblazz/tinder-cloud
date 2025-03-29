@@ -43,7 +43,7 @@ The system will implement these key dating platform capabilities:
 
 ### Architecture
 
-[Link to architecture documentation]
+- [Link to architecture documentation](docs/architecture/high-level.md)
 
 Shield: [![CC BY-NC 4.0][cc-by-nc-shield]][cc-by-nc]
 

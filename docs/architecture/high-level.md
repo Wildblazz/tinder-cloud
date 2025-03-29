@@ -8,7 +8,7 @@
 <!-- eraser-additional-content -->
 ## Diagrams
 <!-- eraser-additional-files -->
-<a href="/.eraser/high-level-cloud-architecture-1.eraserdiagram" data-element-id="UdU1j2rHdqhDIawopsMIp"><img src="/.eraser/high-level.png" alt="" data-element-id="UdU1j2rHdqhDIawopsMIp" /></a>
+<a href="/docs/architecture/.eraser/high-level-cloud-architecture-1.eraserdiagram" data-element-id="UdU1j2rHdqhDIawopsMIp"><img src="/docs/architecture/.eraser/high-level.png" alt="" data-element-id="UdU1j2rHdqhDIawopsMIp" /></a>
 <!-- end-eraser-additional-files -->
 <!-- end-eraser-additional-content -->
 <!--- Eraser file: https://app.eraser.io/workspace/TTdfYOAe4CUpQKFJSdEQ --->

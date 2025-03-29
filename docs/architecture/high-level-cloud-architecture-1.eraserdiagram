@@ -1,5 +1,7 @@
 cloud-architecture-diagram
 
+cloud-architecture-diagram
+
 Kubernetes Cluster [icon: k8s-cluster] {
   API Gateway & Routing  [icon: nginx] {
     NGINX Ingress Controller [icon:k8s-ingress]

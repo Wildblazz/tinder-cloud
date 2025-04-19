@@ -1,13 +1,14 @@
 package io.github.wildblazz.profile_service.controller
 
+import io.github.wildblazz.profile_service.model.dto.CreateProfileDto
 import io.github.wildblazz.profile_service.model.dto.ProfileDto
 import io.github.wildblazz.profile_service.service.ProfileService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.web.bind.annotation.*
-import java.util.*
 
 
 @RestController
@@ -15,8 +16,9 @@ import java.util.*
 class ProfileController(private val profileService: ProfileService) {
 
     @GetMapping("/{id}")
-    fun getProfile(@PathVariable id: UUID): ResponseEntity<ProfileDto> {
-        val profile = profileService.getProfileById(id)
+    @PreAuthorize("hasRole('ADMIN')")
+    fun getProfile(@PathVariable userId: String): ResponseEntity<ProfileDto> {
+        val profile = profileService.getProfileByUserId(userId)
         return ResponseEntity.ok(profile)
     }
 
@@ -28,33 +30,32 @@ class ProfileController(private val profileService: ProfileService) {
     }
 
     @PostMapping
+    @PreAuthorize("permitAll()")
     fun createProfile(
-        @RequestBody profileDto: ProfileDto,
-        @AuthenticationPrincipal jwt: Jwt
+        @RequestBody profileDto: CreateProfileDto,
     ): ResponseEntity<ProfileDto> {
-        val userId = jwt.subject
-        val savedProfile = profileService.createProfile(profileDto, userId)
+        val savedProfile = profileService.createProfile(profileDto)
         return ResponseEntity.status(HttpStatus.CREATED).body(savedProfile)
     }
 
     @PutMapping("/{id}")
     fun updateProfile(
-        @PathVariable id: UUID,
         @RequestBody profileDto: ProfileDto,
         @AuthenticationPrincipal jwt: Jwt
     ): ResponseEntity<ProfileDto> {
         val userId = jwt.subject
-        val updatedProfile = profileService.updateProfile(id, profileDto, userId)
+        val updatedProfile = profileService.updateProfile(userId, profileDto)
         return ResponseEntity.ok(updatedProfile)
     }
 
     @DeleteMapping("/{id}")
     fun deleteProfile(
-        @PathVariable id: UUID,
+        @PathVariable id: String,
         @AuthenticationPrincipal jwt: Jwt
     ): ResponseEntity<Unit> {
         val userId = jwt.subject
-        profileService.deleteProfile(id, userId)
+//        TODO Add a path to token userId Validator
+        profileService.deleteProfile(id)
         return ResponseEntity.noContent().build()
     }
 

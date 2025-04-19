@@ -14,8 +14,17 @@ data class Profile(
     @Column(nullable = false, unique = true)
     var userId: String,
 
+    @Column(nullable = false, unique = true)
+    var userName: String,
+
+    @Column(nullable = false, unique = true)
+    var email: String,
+
     @Column(nullable = false)
-    var name: String,
+    var firstName: String,
+
+    @Column(nullable = false)
+    var lastName: String,
 
     @Column(nullable = false)
     var age: Int,

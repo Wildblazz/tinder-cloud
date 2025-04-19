@@ -1,0 +1,121 @@
+package io.github.wildblazz.profile_service.service
+
+import io.github.wildblazz.profile_service.exception.NotFoundException
+import io.github.wildblazz.profile_service.model.KeycloakRole
+import io.github.wildblazz.profile_service.model.KeycloakUser
+import io.github.wildblazz.profile_service.model.dto.CreateProfileDto
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.http.HttpEntity
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpMethod
+import org.springframework.http.ResponseEntity
+import org.springframework.security.oauth2.client.OAuth2AuthorizeRequest
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClient
+import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
+import org.springframework.stereotype.Component
+import org.springframework.web.client.RestClientException
+import org.springframework.web.client.RestTemplate
+import java.time.Instant
+
+@Component
+class KeycloakAdminClient(
+    private val restTemplate: RestTemplate,
+    private val authorizedClientManager: OAuth2AuthorizedClientManager,
+    private val clientRegistrationRepository: ClientRegistrationRepository,
+    @Value("\${keycloak.admin-url}") private val keycloakAdminUrl: String,
+) {
+    private val token: String = ""
+    private var tokenExpirationTime: Instant = Instant.now();
+
+    private fun getAccessToken(): String {
+        if (!isTokenValid()) {
+            val clientRegistration = clientRegistrationRepository.findByRegistrationId("keycloak")
+                ?: throw IllegalStateException("Keycloak client registration not found")
+
+            val authorizeRequest = OAuth2AuthorizeRequest.withClientRegistrationId(clientRegistration.registrationId)
+                .principal("system")
+                .build()
+
+            val authorizedClient: OAuth2AuthorizedClient = authorizedClientManager.authorize(authorizeRequest)
+                ?: throw IllegalStateException("Failed to authorize Keycloak client")
+            tokenExpirationTime = authorizedClient.accessToken.expiresAt!!
+            return authorizedClient.accessToken.tokenValue
+        } else return token
+    }
+
+    private fun isTokenValid(): Boolean {
+        return token.isNotBlank() && tokenExpirationTime > Instant.now()
+    }
+
+    fun findUserByEmail(email: String): KeycloakUser? {
+        val url = "${keycloakAdminUrl}/users?email=$email"
+        val headers = HttpHeaders().apply {
+            set("Authorization", "Bearer ${getAccessToken()}")
+        }
+        val response: ResponseEntity<Array<KeycloakUser>>;
+        try {
+            response = restTemplate.exchange(
+                url, HttpMethod.GET, HttpEntity<Any>(headers), Array<KeycloakUser>::class.java
+            )
+        } catch (_: RestClientException) {
+            return null;
+        }
+
+        return response.body?.firstOrNull()
+    }
+
+    fun createUser(profileDto: CreateProfileDto): String {
+        val url = "${keycloakAdminUrl}/users"
+        val headers = HttpHeaders().apply {
+            set("Authorization", "Bearer ${getAccessToken()}")
+            set("Content-Type", "application/json")
+        }
+        val userPayload = mapOf(
+            "username" to profileDto.userName,
+            "firstName" to profileDto.firstName,
+            "lastName" to profileDto.lastName,
+            "email" to profileDto.email,
+            "enabled" to true
+        )
+        val response = restTemplate.exchange(
+            url, HttpMethod.POST, HttpEntity(userPayload, headers), Map::class.java
+        )
+        return response.headers["Location"]?.first()?.split("/")?.last()
+            ?: throw IllegalStateException("Failed to create user in Keycloak")
+    }
+
+    fun assignRoleToUser(userId: String, roleName: String) {
+        val role = getRole(roleName);
+        if (role != null) {
+            val url = "${keycloakAdminUrl}/users/$userId/role-mappings/realm"
+            val headers = HttpHeaders().apply {
+                set("Authorization", "Bearer ${getAccessToken()}")
+                set("Content-Type", "application/json")
+            }
+            val rolePayload = listOf(
+                mapOf(
+                    "id" to role.id,
+                    "name" to role.name,
+                    "clientRole" to false
+                )
+            )
+            restTemplate.exchange(url, HttpMethod.POST, HttpEntity(rolePayload, headers), Void::class.java)
+        }
+    }
+
+    fun getRole(roleName: String): KeycloakRole? {
+        val url = "${keycloakAdminUrl}/roles/$roleName"
+        val headers = HttpHeaders().apply {
+            set("Authorization", "Bearer ${getAccessToken()}")
+            set("Content-Type", "application/json")
+        }
+        return try {
+            restTemplate.exchange(
+                url, HttpMethod.GET, HttpEntity<Any>(headers), KeycloakRole::class.java
+            ).body
+        } catch (_: RestClientException) {
+            throw NotFoundException("Role ${roleName} is not found")
+        }
+    }
+}

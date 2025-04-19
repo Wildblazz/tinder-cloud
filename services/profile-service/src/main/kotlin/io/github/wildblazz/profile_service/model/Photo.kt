@@ -2,7 +2,7 @@ package io.github.wildblazz.profile_service.model
 
 import jakarta.persistence.*
 import java.time.LocalDateTime
-import java.util.UUID
+import java.util.*
 
 @Entity
 @Table(name = "photos")

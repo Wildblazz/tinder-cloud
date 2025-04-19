@@ -1,7 +1,6 @@
 package io.github.wildblazz.profile_service.model.dto
 
-data class ProfileDto(
-    val userId: String,
+data class CreateProfileDto(
     val userName: String,
     val firstName: String,
     val lastName: String,

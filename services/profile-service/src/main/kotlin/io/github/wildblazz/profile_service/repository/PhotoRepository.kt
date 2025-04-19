@@ -3,7 +3,7 @@ package io.github.wildblazz.profile_service.repository
 import io.github.wildblazz.profile_service.model.Photo
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Repository
-import java.util.UUID
+import java.util.*
 
 @Repository
 interface PhotoRepository : JpaRepository<Photo, UUID> {

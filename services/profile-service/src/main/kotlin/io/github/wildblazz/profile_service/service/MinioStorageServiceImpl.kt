@@ -16,7 +16,6 @@ class MinioStorageServiceImpl(
 
     @PostConstruct
     fun init() {
-        // Check if the bucket exists and create it if it doesn't
         val bucketExists = minioClient.bucketExists(BucketExistsArgs.builder().bucket(bucketName).build())
         if (!bucketExists) {
             minioClient.makeBucket(MakeBucketArgs.builder().bucket(bucketName).build())

@@ -1,8 +1,8 @@
 package io.github.wildblazz.profile_service.service
 
+import io.github.wildblazz.profile_service.exception.NotFoundException
 import io.github.wildblazz.profile_service.exception.PhotoNotFoundException
-import io.github.wildblazz.profile_service.exception.ProfileNotFoundException
-import io.github.wildblazz.profile_service.exception.UnauthorizedAccessException
+import io.github.wildblazz.profile_service.exception.UnauthorizedException
 import io.github.wildblazz.profile_service.model.Photo
 import io.github.wildblazz.profile_service.model.dto.PhotoDto
 import io.github.wildblazz.profile_service.repository.PhotoRepository
@@ -23,10 +23,10 @@ class PhotoServiceImpl(
     @Transactional
     override fun uploadPhoto(profileId: UUID, file: MultipartFile, userId: String): PhotoDto {
         val profile = profileRepository.findByIdOrNull(profileId)
-            ?: throw ProfileNotFoundException("Profile with id $profileId not found")
+            ?: throw NotFoundException("Profile with id $profileId not found")
 
         if (profile.userId != userId) {
-            throw UnauthorizedAccessException("You don't have permission to upload photos to this profile")
+            throw UnauthorizedException("You don't have permission to upload photos to this profile")
         }
 
         val fileName = "${UUID.randomUUID()}-${file.originalFilename}"
@@ -47,7 +47,7 @@ class PhotoServiceImpl(
 
     override fun getPhotosByProfileId(profileId: UUID): List<PhotoDto> {
         if (!profileRepository.existsById(profileId)) {
-            throw ProfileNotFoundException("Profile with id $profileId not found")
+            throw NotFoundException("Profile with id $profileId not found")
         }
 
         val photos = photoRepository.findByProfileIdOrderByIsMainDesc(profileId)
@@ -57,10 +57,10 @@ class PhotoServiceImpl(
     @Transactional
     override fun deletePhoto(profileId: UUID, photoId: UUID, userId: String) {
         val profile = profileRepository.findByIdOrNull(profileId)
-            ?: throw ProfileNotFoundException("Profile with id $profileId not found")
+            ?: throw NotFoundException("Profile with id $profileId not found")
 
         if (profile.userId != userId) {
-            throw UnauthorizedAccessException("You don't have permission to delete photos from this profile")
+            throw UnauthorizedException("You don't have permission to delete photos from this profile")
         }
 
         val photo = photoRepository.findByIdAndProfileId(photoId, profileId)
@@ -83,10 +83,10 @@ class PhotoServiceImpl(
     @Transactional
     override fun setMainPhoto(profileId: UUID, photoId: UUID, userId: String) {
         val profile = profileRepository.findByIdOrNull(profileId)
-            ?: throw ProfileNotFoundException("Profile with id $profileId not found")
+            ?: throw NotFoundException("Profile with id $profileId not found")
 
         if (profile.userId != userId) {
-            throw UnauthorizedAccessException("You don't have permission to modify photos for this profile")
+            throw UnauthorizedException("You don't have permission to modify photos for this profile")
         }
 
         val newMainPhoto = photoRepository.findByIdAndProfileId(photoId, profileId)

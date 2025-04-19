@@ -6,12 +6,12 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Repository
-import java.util.UUID
+import java.util.*
 
 @Repository
 interface ProfileRepository : JpaRepository<Profile, UUID> {
     fun findByUserId(userId: String): Profile?
-    fun existsByUserId(userId: String): Boolean
+    fun existsByEmail(email: String): Boolean
 
     fun findByAge(age: Int, pageable: Pageable): Page<Profile>
     fun findByGender(gender: String, pageable: Pageable): Page<Profile>

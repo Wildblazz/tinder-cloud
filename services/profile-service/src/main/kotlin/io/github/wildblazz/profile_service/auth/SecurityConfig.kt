@@ -22,7 +22,11 @@ class SecurityConfig(
     fun filterChain(http: HttpSecurity): SecurityFilterChain {
         http
             .authorizeHttpRequests { auth ->
-                auth.anyRequest().authenticated()
+                auth.requestMatchers("/api/profiles").permitAll() // Allow creating profiles
+                    .anyRequest().authenticated()
+            }
+            .csrf { csrf ->
+                csrf.ignoringRequestMatchers("/api/profiles")
             }
             .oauth2ResourceServer { oauth2 ->
                 oauth2.jwt { jwt ->

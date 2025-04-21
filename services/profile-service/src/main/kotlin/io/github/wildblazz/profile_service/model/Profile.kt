@@ -6,7 +6,10 @@ import java.time.LocalDateTime
 import java.util.*
 
 @Entity
-@Table(name = "profiles")
+@Table(
+    name = "profiles",
+    indexes = [Index(name = "idx_user_id", columnList = "userId")]
+)
 data class Profile(
     @Id
     var id: UUID = UUID.randomUUID(),
@@ -35,6 +38,7 @@ data class Profile(
     @Column(columnDefinition = "TEXT")
     var bio: String? = null,
 
+//    TODO add PostGIS support
     var location: String? = null,
 
     @ElementCollection

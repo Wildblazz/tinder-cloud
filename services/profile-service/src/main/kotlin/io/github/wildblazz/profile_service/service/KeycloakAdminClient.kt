@@ -76,7 +76,14 @@ class KeycloakAdminClient(
             "firstName" to profileDto.firstName,
             "lastName" to profileDto.lastName,
             "email" to profileDto.email,
-            "enabled" to true
+            "enabled" to true,
+            "credentials" to listOf(
+                mapOf(
+                    "type" to "password",
+                    "value" to profileDto.password,
+                    "temporary" to false
+                )
+            )
         )
         val response = restTemplate.exchange(
             url, HttpMethod.POST, HttpEntity(userPayload, headers), Map::class.java
@@ -117,5 +124,31 @@ class KeycloakAdminClient(
         } catch (_: RestClientException) {
             throw NotFoundException("Role ${roleName} is not found")
         }
+    }
+
+    fun updateUser(userId: String, firstName: String, lastName: String, email: String) {
+        val url = "${keycloakAdminUrl}/users/$userId"
+        val headers = HttpHeaders().apply {
+            set("Authorization", "Bearer ${getAccessToken()}")
+            set("Content-Type", "application/json")
+        }
+        val userPayload = mapOf(
+            "firstName" to firstName,
+            "lastName" to lastName,
+            "email" to email
+        )
+        restTemplate.exchange(
+            url, HttpMethod.PUT, HttpEntity(userPayload, headers), Void::class.java
+        )
+    }
+
+    fun deleteUser(userId: String) {
+        val url = "${keycloakAdminUrl}/users/$userId"
+        val headers = HttpHeaders().apply {
+            set("Authorization", "Bearer ${getAccessToken()}")
+        }
+        restTemplate.exchange(
+            url, HttpMethod.DELETE, HttpEntity<Any>(headers), Void::class.java
+        )
     }
 }

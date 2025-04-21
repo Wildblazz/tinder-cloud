@@ -5,8 +5,8 @@ import org.springframework.web.multipart.MultipartFile
 import java.util.*
 
 interface PhotoService {
-    fun uploadPhoto(profileId: UUID, file: MultipartFile, userId: String): PhotoDto
-    fun getPhotosByProfileId(profileId: UUID): List<PhotoDto>
-    fun deletePhoto(profileId: UUID, photoId: UUID, userId: String)
-    fun setMainPhoto(profileId: UUID, photoId: UUID, userId: String)
+    fun uploadPhoto(userId: String, file: MultipartFile): PhotoDto
+    fun getPhotosByProfileId(userId: String): List<PhotoDto>
+    fun deletePhoto(userId: String, photoId: UUID)
+    fun setMainPhoto(userId: String, photoId: UUID)
 }

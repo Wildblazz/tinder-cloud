@@ -2,21 +2,26 @@ package io.github.wildblazz.profile_service.controller
 
 import io.github.wildblazz.profile_service.model.dto.CreateProfileDto
 import io.github.wildblazz.profile_service.model.dto.ProfileDto
+import io.github.wildblazz.profile_service.model.dto.SearchCriteria
+import io.github.wildblazz.profile_service.model.dto.UpdateProfileDto
 import io.github.wildblazz.profile_service.service.ProfileService
+import jakarta.validation.Valid
+import org.springframework.data.domain.Page
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.oauth2.jwt.Jwt
+import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 
 
+@Validated
 @RestController
 @RequestMapping("/api/profiles")
 class ProfileController(private val profileService: ProfileService) {
 
-    @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/{userId}")
     fun getProfile(@PathVariable userId: String): ResponseEntity<ProfileDto> {
         val profile = profileService.getProfileByUserId(userId)
         return ResponseEntity.ok(profile)
@@ -32,29 +37,27 @@ class ProfileController(private val profileService: ProfileService) {
     @PostMapping
     @PreAuthorize("permitAll()")
     fun createProfile(
-        @RequestBody profileDto: CreateProfileDto,
+        @RequestBody @Valid profileDto: CreateProfileDto,
     ): ResponseEntity<ProfileDto> {
         val savedProfile = profileService.createProfile(profileDto)
         return ResponseEntity.status(HttpStatus.CREATED).body(savedProfile)
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or #id == authentication.name")
     fun updateProfile(
-        @RequestBody profileDto: ProfileDto,
-        @AuthenticationPrincipal jwt: Jwt
+        @PathVariable id: String,
+        @RequestBody @Valid profileDto: UpdateProfileDto,
     ): ResponseEntity<ProfileDto> {
-        val userId = jwt.subject
-        val updatedProfile = profileService.updateProfile(userId, profileDto)
+        val updatedProfile = profileService.updateProfile(id, profileDto)
         return ResponseEntity.ok(updatedProfile)
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or #id == authentication.name")
     fun deleteProfile(
-        @PathVariable id: String,
-        @AuthenticationPrincipal jwt: Jwt
+        @PathVariable id: String
     ): ResponseEntity<Unit> {
-        val userId = jwt.subject
-//        TODO Add a path to token userId Validator
         profileService.deleteProfile(id)
         return ResponseEntity.noContent().build()
     }
@@ -64,10 +67,12 @@ class ProfileController(private val profileService: ProfileService) {
         @RequestParam(required = false) age: Int?,
         @RequestParam(required = false) gender: String?,
         @RequestParam(required = false) location: String?,
+        @RequestParam(required = false) interests: List<String>?,
         @RequestParam(defaultValue = "0") page: Int,
         @RequestParam(defaultValue = "10") size: Int
-    ): ResponseEntity<List<ProfileDto>> {
-        val profiles = profileService.searchProfiles(age, gender, location, page, size)
+    ): ResponseEntity<Page<ProfileDto>> {
+        val criteria = SearchCriteria(age = age, gender = gender, location = location, interests = interests)
+        val profiles = profileService.searchProfiles(criteria, page, size)
         return ResponseEntity.ok(profiles)
     }
 }

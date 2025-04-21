@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.authorization.AuthorizationDeniedException
 import org.springframework.security.core.AuthenticationException
+import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.MissingPathVariableException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
@@ -74,6 +75,12 @@ class GlobalExceptionHandler {
         return ResponseEntity(errorResponse, HttpStatus.NOT_FOUND)
     }
 
+    @ExceptionHandler(MethodArgumentNotValidException::class)
+    fun handleMethodArgumentNotValidException(ex: MethodArgumentNotValidException): ResponseEntity<Map<String, String>> {
+        val errors = ex.bindingResult.fieldErrors.associate { it.field to (it.defaultMessage ?: "Invalid value") }
+        return ResponseEntity(errors, HttpStatus.BAD_REQUEST)
+    }
+
     @ExceptionHandler(UnauthorizedException::class)
     fun handleUnauthorizedAccessException(
         ex: UnauthorizedException,
@@ -92,6 +99,16 @@ class GlobalExceptionHandler {
         val errorResponse = ErrorResponse(
             status = HttpStatus.INTERNAL_SERVER_ERROR.value(),
             message = ex.message ?: "Storage error occurred",
+            timestamp = System.currentTimeMillis()
+        )
+        return ResponseEntity(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR)
+    }
+
+    @ExceptionHandler(IllegalArgumentException::class)
+    fun handleIllegalArgumentException(ex: IllegalArgumentException): ResponseEntity<ErrorResponse> {
+        val errorResponse = ErrorResponse(
+            status = HttpStatus.BAD_REQUEST.value(),
+            message = ex.message ?: "Illegal argument",
             timestamp = System.currentTimeMillis()
         )
         return ResponseEntity(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR)

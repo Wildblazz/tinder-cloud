@@ -2,12 +2,12 @@ package io.github.wildblazz.profile_service.service
 
 import io.github.wildblazz.profile_service.exception.NotFoundException
 import io.github.wildblazz.profile_service.exception.PhotoNotFoundException
-import io.github.wildblazz.profile_service.exception.UnauthorizedException
+import io.github.wildblazz.profile_service.exception.StorageException
 import io.github.wildblazz.profile_service.model.Photo
+import io.github.wildblazz.profile_service.model.Profile
 import io.github.wildblazz.profile_service.model.dto.PhotoDto
 import io.github.wildblazz.profile_service.repository.PhotoRepository
 import io.github.wildblazz.profile_service.repository.ProfileRepository
-import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile
@@ -21,18 +21,19 @@ class PhotoServiceImpl(
 ) : PhotoService {
 
     @Transactional
-    override fun uploadPhoto(profileId: UUID, file: MultipartFile, userId: String): PhotoDto {
-        val profile = profileRepository.findByIdOrNull(profileId)
-            ?: throw NotFoundException("Profile with id $profileId not found")
+    override fun uploadPhoto(userId: String, file: MultipartFile): PhotoDto {
+        validateFileType(file)
+        val profile = getUserProfile(userId)
 
-        if (profile.userId != userId) {
-            throw UnauthorizedException("You don't have permission to upload photos to this profile")
-        }
+        val photoCount = photoRepository.countByProfileId(profile.id)
+        if (photoCount >= 5L) throw StorageException("Exceeded max amount of photos. Remove something first")
 
-        val fileName = "${UUID.randomUUID()}-${file.originalFilename}"
+
+        val fileName = "${UUID.randomUUID()}-${profile.id}"
         val url = storageService.uploadFile(fileName, file.inputStream, file.contentType ?: "image/jpeg")
 
-        val isMain = photoRepository.countByProfileId(profileId) == 0L
+
+        val isMain = photoCount == 0L
 
         val photo = Photo(
             id = UUID.randomUUID(),
@@ -45,26 +46,19 @@ class PhotoServiceImpl(
         return mapToDto(savedPhoto)
     }
 
-    override fun getPhotosByProfileId(profileId: UUID): List<PhotoDto> {
-        if (!profileRepository.existsById(profileId)) {
-            throw NotFoundException("Profile with id $profileId not found")
-        }
+    override fun getPhotosByProfileId(userId: String): List<PhotoDto> {
+        val profile = getUserProfile(userId)
 
-        val photos = photoRepository.findByProfileIdOrderByIsMainDesc(profileId)
+        val photos = photoRepository.findByProfileIdOrderByIsMainDesc(profile.id)
         return photos.map { mapToDto(it) }
     }
 
     @Transactional
-    override fun deletePhoto(profileId: UUID, photoId: UUID, userId: String) {
-        val profile = profileRepository.findByIdOrNull(profileId)
-            ?: throw NotFoundException("Profile with id $profileId not found")
+    override fun deletePhoto(userId: String, photoId: UUID) {
+        val profile = getUserProfile(userId)
 
-        if (profile.userId != userId) {
-            throw UnauthorizedException("You don't have permission to delete photos from this profile")
-        }
-
-        val photo = photoRepository.findByIdAndProfileId(photoId, profileId)
-            ?: throw PhotoNotFoundException("Photo with id $photoId not found for profile $profileId")
+        val photo = photoRepository.findByIdAndProfileId(photoId, profile.id)
+            ?: throw PhotoNotFoundException("Photo with id $photoId not found for user $userId")
 
         val fileName = photo.url.substringAfterLast("/")
         storageService.deleteFile(fileName)
@@ -72,7 +66,7 @@ class PhotoServiceImpl(
         photoRepository.delete(photo)
 
         if (photo.isMain) {
-            val nextPhoto = photoRepository.findFirstByProfileId(profileId)
+            val nextPhoto = photoRepository.findFirstByProfileId(profile.id)
             nextPhoto?.let {
                 it.isMain = true
                 photoRepository.save(it)
@@ -81,18 +75,13 @@ class PhotoServiceImpl(
     }
 
     @Transactional
-    override fun setMainPhoto(profileId: UUID, photoId: UUID, userId: String) {
-        val profile = profileRepository.findByIdOrNull(profileId)
-            ?: throw NotFoundException("Profile with id $profileId not found")
+    override fun setMainPhoto(userId: String, photoId: UUID) {
+        val profile = getUserProfile(userId)
 
-        if (profile.userId != userId) {
-            throw UnauthorizedException("You don't have permission to modify photos for this profile")
-        }
+        val newMainPhoto = photoRepository.findByIdAndProfileId(photoId, profile.id)
+            ?: throw PhotoNotFoundException("Photo with id $photoId not found for user $userId")
 
-        val newMainPhoto = photoRepository.findByIdAndProfileId(photoId, profileId)
-            ?: throw PhotoNotFoundException("Photo with id $photoId not found for profile $profileId")
-
-        val currentMainPhoto = photoRepository.findByProfileIdAndIsMainTrue(profileId)
+        val currentMainPhoto = photoRepository.findByProfileIdAndIsMainTrue(profile.id)
         currentMainPhoto?.let {
             it.isMain = false
             photoRepository.save(it)
@@ -102,11 +91,23 @@ class PhotoServiceImpl(
         photoRepository.save(newMainPhoto)
     }
 
+    private fun getUserProfile(userId: String): Profile {
+        return profileRepository.findByUserId(userId) ?: throw NotFoundException("Profile with id $userId not found")
+    }
+
     private fun mapToDto(photo: Photo): PhotoDto {
         return PhotoDto(
             id = photo.id,
             url = photo.url,
             isMain = photo.isMain
         )
+    }
+
+    private fun validateFileType(file: MultipartFile) {
+//        TODO move allowed types to app.yaml
+        val allowedContentTypes = listOf("image/jpeg", "image/jpg", "image/png", "image/gif")
+        if (file.contentType !in allowedContentTypes) {
+            throw IllegalArgumentException("Invalid file type. Only JPG, JPEG, PNG, and GIF are allowed.")
+        }
     }
 }

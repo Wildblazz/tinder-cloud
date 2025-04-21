@@ -1,11 +1,14 @@
 package io.github.wildblazz.profile_service.service
 
 import io.github.wildblazz.profile_service.exception.NotFoundException
-import io.github.wildblazz.profile_service.exception.UnauthorizedException
 import io.github.wildblazz.profile_service.model.Profile
 import io.github.wildblazz.profile_service.model.dto.CreateProfileDto
 import io.github.wildblazz.profile_service.model.dto.ProfileDto
+import io.github.wildblazz.profile_service.model.dto.SearchCriteria
+import io.github.wildblazz.profile_service.model.dto.UpdateProfileDto
 import io.github.wildblazz.profile_service.repository.ProfileRepository
+import jakarta.persistence.criteria.Predicate
+import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -48,26 +51,21 @@ class ProfileServiceImpl(
     }
 
     @Transactional
-    override fun updateProfile(userId: String, profileDto: ProfileDto): ProfileDto {
+    override fun updateProfile(userId: String, profileDto: UpdateProfileDto): ProfileDto {
         val existingProfile =
             profileRepository.findByUserId(userId)
                 ?: throw NotFoundException("Profile with id $userId not found")
 
-        if (profileDto.userId != userId) {
-            throw UnauthorizedException("You don't have permission to update this profile")
+        existingProfile.apply {
+            firstName = profileDto.firstName?.takeIf { it.isNotBlank() } ?: firstName
+            lastName = profileDto.lastName?.takeIf { it.isNotBlank() } ?: lastName
+            email = profileDto.email?.takeIf { it.isNotBlank() } ?: email
+            bio = profileDto.bio?.takeIf { it.isNotBlank() } ?: bio
+            location = profileDto.location?.takeIf { it.isNotBlank() } ?: location
+            interests = profileDto.interests?.takeIf { it.isNotEmpty() } ?: interests
         }
 
-        existingProfile.apply {
-            userName = profileDto.userName
-            firstName = profileDto.firstName
-            lastName = profileDto.lastName
-            email = profileDto.email
-            age = profileDto.age
-            gender = profileDto.gender
-            bio = profileDto.bio
-            location = profileDto.location
-            interests = profileDto.interests
-        }
+        keycloakService.updateUser(userId, existingProfile.firstName, existingProfile.lastName, existingProfile.email)
 
         val updatedProfile = profileRepository.save(existingProfile)
         return mapToDto(updatedProfile)
@@ -79,41 +77,28 @@ class ProfileServiceImpl(
             profileRepository.findByUserId(userId)
                 ?: throw NotFoundException("Profile with id $userId not found")
 
+        keycloakService.deleteUser(userId)
         profileRepository.delete(profile)
     }
 
-    override fun searchProfiles(age: Int?, gender: String?, location: String?, page: Int, size: Int): List<ProfileDto> {
+    override fun searchProfiles(criteria: SearchCriteria, page: Int, size: Int): Page<ProfileDto> {
         val pageable = PageRequest.of(page, size)
-        val profiles = when {
-            age != null && gender != null && location != null -> profileRepository.findByAgeAndGenderAndLocationContainingIgnoreCase(
-                age,
-                gender,
-                location,
-                pageable
-            )
 
-            age != null && gender != null -> profileRepository.findByAgeAndGender(age, gender, pageable)
+        val profiles = profileRepository.findAll({ root, query, cb ->
+            val predicates = mutableListOf<Predicate>()
 
-            age != null && location != null -> profileRepository.findByAgeAndLocationContainingIgnoreCase(
-                age,
-                location,
-                pageable
-            )
-
-            gender != null && location != null -> profileRepository.findByGenderAndLocationContainingIgnoreCase(
-                gender,
-                location,
-                pageable
-            )
-
-            age != null -> profileRepository.findByAge(age, pageable)
-
-            gender != null -> profileRepository.findByGender(gender, pageable)
-
-            location != null -> profileRepository.findByLocationContainingIgnoreCase(location, pageable)
-
-            else -> profileRepository.findAll(pageable)
-        }.content
+            criteria.age?.let { predicates.add(cb.equal(root.get<Int>("age"), it)) }
+            criteria.gender?.let { predicates.add(cb.equal(root.get<String>("gender"), it)) }
+            criteria.location?.let { predicates.add(cb.like(cb.lower(root.get("location")), "%${it.lowercase()}%")) }
+            criteria.bio?.let { predicates.add(cb.like(cb.lower(root.get("bio")), "%${it.lowercase()}%")) }
+            criteria.interests?.let { interests ->
+                val interestPredicates = interests.map { interest ->
+                    cb.isMember(interest.lowercase(), root.get<Set<String>>("interests"))
+                }
+                predicates.add(cb.or(*interestPredicates.toTypedArray()))
+            }
+            cb.and(*predicates.toTypedArray())
+        }, pageable)
 
         return profiles.map { mapToDto(it) }
     }

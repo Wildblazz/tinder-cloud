@@ -19,4 +19,12 @@ class KeycloakService(
 
         return newUserId
     }
+
+    fun updateUser(userId: String, firstName: String, lastName: String, email: String) {
+        keycloakAdminClient.updateUser(userId, firstName, lastName, email)
+    }
+
+    fun deleteUser(userId: String) {
+        keycloakAdminClient.deleteUser(userId)
+    }
 }

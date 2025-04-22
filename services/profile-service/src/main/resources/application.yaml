@@ -27,7 +27,7 @@ spring:
           keycloak:
             issuer-uri: ${keycloak.issuer-url}
   datasource:
-    url: ${POSTGRES_URL:jdbc:postgresql://localhost:5432/tinder}
+    url: ${POSTGRES_URL:jdbc:postgresql://localhost:5432/profiles}
     username: ${POSTGRES_USER}
     password: ${POSTGRES_PASSWORD}
     driver-class-name: org.postgresql.Driver

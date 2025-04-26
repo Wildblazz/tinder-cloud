@@ -1,10 +1,10 @@
 package io.github.wildblazz.profile_service.service
 
 import io.github.wildblazz.common.exception.NotFoundException
-import io.github.wildblazz.common.exception.PhotoNotFoundException
-import io.github.wildblazz.common.exception.StorageException
 import io.github.wildblazz.profile_service.common.Constants
 import io.github.wildblazz.profile_service.common.Constants.EXCEPTION_PROFILE_NOT_FOUND
+import io.github.wildblazz.profile_service.exception.PhotoNotFoundException
+import io.github.wildblazz.profile_service.exception.StorageException
 import io.github.wildblazz.profile_service.model.Photo
 import io.github.wildblazz.profile_service.model.Profile
 import io.github.wildblazz.profile_service.model.dto.PhotoDto

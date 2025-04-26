@@ -14,7 +14,7 @@ import org.springframework.web.context.request.WebRequest
 import java.util.*
 
 @RestControllerAdvice
-class GlobalExceptionHandler(
+class SharedGlobalExceptionHandler(
     private val messageSource: MessageSource
 
 ) {
@@ -27,13 +27,6 @@ class GlobalExceptionHandler(
         return ResponseEntity<ErrorDetails>(ErrorDetails(errorMessage), HttpStatus.NOT_FOUND)
     }
 
-
-    @ExceptionHandler(PhotoNotFoundException::class)
-    fun handlePhotoNotFoundException(ex: PhotoNotFoundException, request: WebRequest): ResponseEntity<ErrorDetails> {
-        val errorMessage = this.getMessage(ex.messageKey, ex.getDefaultMessageKey(), ex.getArgs())
-        return ResponseEntity<ErrorDetails>(ErrorDetails(errorMessage), HttpStatus.NOT_FOUND)
-    }
-
     @ExceptionHandler(UnauthorizedException::class)
     fun handleUnauthorizedAccessException(
         ex: UnauthorizedException,
@@ -41,13 +34,6 @@ class GlobalExceptionHandler(
     ): ResponseEntity<ErrorDetails> {
         val errorMessage = this.getMessage(ex.messageKey, ex.getDefaultMessageKey(), ex.getArgs())
         return ResponseEntity<ErrorDetails>(ErrorDetails(errorMessage), HttpStatus.FORBIDDEN)
-    }
-
-
-    @ExceptionHandler(StorageException::class)
-    fun handleStorageException(ex: StorageException, request: WebRequest): ResponseEntity<ErrorDetails> {
-        val errorMessage = this.getMessage(ex.messageKey, ex.getDefaultMessageKey(), ex.getArgs())
-        return ResponseEntity<ErrorDetails>(ErrorDetails(errorMessage), HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
     @ExceptionHandler(KeyCloakException::class)
@@ -73,7 +59,12 @@ class GlobalExceptionHandler(
 
     @ExceptionHandler(IllegalArgumentException::class)
     fun handleIllegalArgumentException(ex: IllegalArgumentException): ResponseEntity<ErrorDetails> {
+        val errorMessage = ex.message ?: getMessage(Constants.EXCEPTION_ILLEGAL_ARGUMENT)
+        return ResponseEntity(ErrorDetails(errorMessage), HttpStatus.INTERNAL_SERVER_ERROR)
+    }
 
+    @ExceptionHandler(IllegalStateException::class)
+    fun handleIllegalStateException(ex: IllegalStateException): ResponseEntity<ErrorDetails> {
         val errorMessage = ex.message ?: getMessage(Constants.EXCEPTION_ILLEGAL_ARGUMENT)
 
         return ResponseEntity(ErrorDetails(errorMessage), HttpStatus.INTERNAL_SERVER_ERROR)
@@ -86,18 +77,10 @@ class GlobalExceptionHandler(
     }
 
     private fun getMessage(messageKey: String?, defaultMessageKey: String, args: Array<Any?>?): String {
-        return try {
-            messageSource.getMessage(messageKey ?: defaultMessageKey, args, Locale.ROOT)
-        } catch (e: Exception) {
-            messageSource.getMessage(defaultMessageKey, args, Locale.ROOT)
-        }
+        return MessageUtil.getMessage(messageSource, messageKey, defaultMessageKey, args)
     }
 
     private fun getMessage(messageKey: String): String {
-        return try {
-            messageSource.getMessage(messageKey, null, Locale.ROOT)
-        } catch (e: Exception) {
-            "Message not found for key: $messageKey"
-        }
+        return MessageUtil.getMessage(messageSource, messageKey)
     }
 }

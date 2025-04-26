@@ -1,5 +1,6 @@
 package io.github.wildblazz.profile_service.service
 
+import io.github.wildblazz.common.exception.DuplicateException
 import io.github.wildblazz.common.exception.NotFoundException
 import io.github.wildblazz.profile_service.common.Constants
 import io.github.wildblazz.profile_service.common.Constants.EXCEPTION_PROFILE_NOT_FOUND
@@ -29,7 +30,7 @@ class ProfileServiceImpl(
     @Transactional
     override fun createProfile(profileDto: CreateProfileDto): ProfileDto {
         if (profileRepository.existsByEmail(profileDto.email)) {
-            throw IllegalStateException("${Constants.EXCEPTION_PROFILE_EXISTS} ${profileDto.email}")
+            throw DuplicateException(Constants.EXCEPTION_PROFILE_DUPLICATE, arrayOf(profileDto.email))
         }
 
         val keycloakUserId = keycloakService.getOrCreateUser(profileDto)

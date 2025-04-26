@@ -4,4 +4,4 @@ class NotFoundException(
     val messageKey: String?,
     args: Array<Any?> = emptyArray(),
     cause: Throwable? = null
-) : ResourceException("exception.not.found", messageKey, args, cause)
+) : ResourceException("exception.default.not.found", messageKey, args, cause)

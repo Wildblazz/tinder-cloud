@@ -1,6 +1,8 @@
 package io.github.wildblazz.profile_service.service
 
-import io.github.wildblazz.profile_service.exception.NotFoundException
+import io.github.wildblazz.common.exception.KeyCloakException
+import io.github.wildblazz.common.exception.NotFoundException
+import io.github.wildblazz.profile_service.common.Constants
 import io.github.wildblazz.profile_service.model.KeycloakRole
 import io.github.wildblazz.profile_service.model.KeycloakUser
 import io.github.wildblazz.profile_service.model.dto.CreateProfileDto
@@ -31,14 +33,14 @@ class KeycloakAdminClient(
     private fun getAccessToken(): String {
         if (!isTokenValid()) {
             val clientRegistration = clientRegistrationRepository.findByRegistrationId("keycloak")
-                ?: throw IllegalStateException("Keycloak client registration not found")
+                ?: throw KeyCloakException(Constants.EXCEPTION_KEYCLOAK_CLIENT_REGISTRATION)
 
             val authorizeRequest = OAuth2AuthorizeRequest.withClientRegistrationId(clientRegistration.registrationId)
                 .principal("system")
                 .build()
 
             val authorizedClient: OAuth2AuthorizedClient = authorizedClientManager.authorize(authorizeRequest)
-                ?: throw IllegalStateException("Failed to authorize Keycloak client")
+                ?: throw IllegalStateException(Constants.EXCEPTION_KEYCLOAK_CLIENT_AUTHORIZATION)
             tokenExpirationTime = authorizedClient.accessToken.expiresAt!!
             return authorizedClient.accessToken.tokenValue
         } else return token
@@ -89,7 +91,7 @@ class KeycloakAdminClient(
             url, HttpMethod.POST, HttpEntity(userPayload, headers), Map::class.java
         )
         return response.headers["Location"]?.first()?.split("/")?.last()
-            ?: throw IllegalStateException("Failed to create user in Keycloak")
+            ?: throw KeyCloakException(Constants.EXCEPTION_KEYCLOAK_USER_CREATION)
     }
 
     fun assignRoleToUser(userId: String, roleName: String) {
@@ -122,7 +124,7 @@ class KeycloakAdminClient(
                 url, HttpMethod.GET, HttpEntity<Any>(headers), KeycloakRole::class.java
             ).body
         } catch (_: RestClientException) {
-            throw NotFoundException("Role ${roleName} is not found")
+            throw NotFoundException(Constants.EXCEPTION_KEYCLOAK_ROLE_NOT_FOUND, arrayOf(roleName))
         }
     }
 

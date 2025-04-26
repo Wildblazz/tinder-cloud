@@ -1,7 +1,7 @@
 package io.github.wildblazz.common.exception
 
-class NotFoundException(
+class KeyCloakException(
     val messageKey: String?,
     args: Array<Any?> = emptyArray(),
     cause: Throwable? = null
-) : ResourceException("exception.not.found", messageKey, args, cause)
+) : ResourceException("exception.keycloak.generic", messageKey, args, cause)

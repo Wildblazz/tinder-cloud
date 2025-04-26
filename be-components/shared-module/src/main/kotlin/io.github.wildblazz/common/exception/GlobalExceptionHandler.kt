@@ -1,78 +1,68 @@
-package io.github.wildblazz.profile_service.exception
+package io.github.wildblazz.common.exception
 
+import io.github.wildblazz.common.constants.Constants
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.context.MessageSource
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.security.authorization.AuthorizationDeniedException
-import org.springframework.security.core.AuthenticationException
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.MissingPathVariableException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.context.request.WebRequest
+import java.util.*
 
 @RestControllerAdvice
-class GlobalExceptionHandler {
+class GlobalExceptionHandler(
+    private val messageSource: MessageSource
+
+) {
     val <T : Any> T.logger: Logger
         get() = LoggerFactory.getLogger(this::class.java)
 
-    @ExceptionHandler(AccessDeniedException::class)
-    fun handleAccessDenied(e: AccessDeniedException): ResponseEntity<ErrorResponse> {
-        val errorResponse = ErrorResponse(
-            status = HttpStatus.FORBIDDEN.value(),
-            message = "Access denied: ${e.message}",
-            timestamp = System.currentTimeMillis()
-        )
-        return ResponseEntity(errorResponse, HttpStatus.FORBIDDEN)
-    }
-
-    @ExceptionHandler(AuthorizationDeniedException::class)
-    fun handleAuthorizationDenied(e: AuthorizationDeniedException): ResponseEntity<String> {
-        logger.warn(">>> Global handler: handleAuthorizationDenied - {}", e.message)
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied: ${e.message}")
-    }
-
-    @ExceptionHandler(AuthenticationException::class)
-    fun handleAuthException(e: AuthenticationException): ResponseEntity<String> {
-        logger.warn(">>> Global handler: AuthenticationException - {}", e.message)
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized: ${e.message}")
-    }
-
     @ExceptionHandler(NotFoundException::class)
-    fun handleProfileNotFoundException(
-        ex: NotFoundException,
-        request: WebRequest
-    ): ResponseEntity<ErrorResponse> {
-        val errorResponse = ErrorResponse(
-            status = HttpStatus.NOT_FOUND.value(),
-            message = ex.message ?: "Profile not found",
-            timestamp = System.currentTimeMillis()
-        )
-        return ResponseEntity(errorResponse, HttpStatus.NOT_FOUND)
+    fun handleResourceNotFoundException(ex: NotFoundException): ResponseEntity<ErrorDetails> {
+        val errorMessage = this.getMessage(ex.messageKey, ex.getDefaultMessageKey(), ex.getArgs())
+        return ResponseEntity<ErrorDetails>(ErrorDetails(errorMessage), HttpStatus.NOT_FOUND)
     }
 
+
+    @ExceptionHandler(PhotoNotFoundException::class)
+    fun handlePhotoNotFoundException(ex: PhotoNotFoundException, request: WebRequest): ResponseEntity<ErrorDetails> {
+        val errorMessage = this.getMessage(ex.messageKey, ex.getDefaultMessageKey(), ex.getArgs())
+        return ResponseEntity<ErrorDetails>(ErrorDetails(errorMessage), HttpStatus.NOT_FOUND)
+    }
+
+    @ExceptionHandler(UnauthorizedException::class)
+    fun handleUnauthorizedAccessException(
+        ex: UnauthorizedException,
+        request: WebRequest
+    ): ResponseEntity<ErrorDetails> {
+        val errorMessage = this.getMessage(ex.messageKey, ex.getDefaultMessageKey(), ex.getArgs())
+        return ResponseEntity<ErrorDetails>(ErrorDetails(errorMessage), HttpStatus.FORBIDDEN)
+    }
+
+
+    @ExceptionHandler(StorageException::class)
+    fun handleStorageException(ex: StorageException, request: WebRequest): ResponseEntity<ErrorDetails> {
+        val errorMessage = this.getMessage(ex.messageKey, ex.getDefaultMessageKey(), ex.getArgs())
+        return ResponseEntity<ErrorDetails>(ErrorDetails(errorMessage), HttpStatus.INTERNAL_SERVER_ERROR)
+    }
+
+    @ExceptionHandler(KeyCloakException::class)
+    fun handleKeyCloakException(ex: KeyCloakException, request: WebRequest): ResponseEntity<ErrorDetails> {
+        val errorMessage = this.getMessage(ex.messageKey, ex.getDefaultMessageKey(), ex.getArgs())
+        return ResponseEntity<ErrorDetails>(ErrorDetails(errorMessage), HttpStatus.FAILED_DEPENDENCY)
+    }
+
+    //Spring exceptions
     @ExceptionHandler(MissingPathVariableException::class)
     fun handleMissingPathVariableException(
         ex: MissingPathVariableException,
         request: WebRequest
-    ): ResponseEntity<ErrorResponse> {
-        val errorResponse = ErrorResponse(
-            status = HttpStatus.NOT_FOUND.value(),
-            message = ex.message ?: "Path is not found",
-            timestamp = System.currentTimeMillis()
-        )
-        return ResponseEntity(errorResponse, HttpStatus.NOT_FOUND)
-    }
-
-    @ExceptionHandler(PhotoNotFoundException::class)
-    fun handlePhotoNotFoundException(ex: PhotoNotFoundException, request: WebRequest): ResponseEntity<ErrorResponse> {
-        val errorResponse = ErrorResponse(
-            status = HttpStatus.NOT_FOUND.value(),
-            message = ex.message ?: "Photo not found",
-            timestamp = System.currentTimeMillis()
-        )
-        return ResponseEntity(errorResponse, HttpStatus.NOT_FOUND)
+    ): ResponseEntity<ErrorDetails> {
+        return ResponseEntity(ErrorDetails(ex.message), HttpStatus.NOT_FOUND)
     }
 
     @ExceptionHandler(MethodArgumentNotValidException::class)
@@ -81,37 +71,12 @@ class GlobalExceptionHandler {
         return ResponseEntity(errors, HttpStatus.BAD_REQUEST)
     }
 
-    @ExceptionHandler(UnauthorizedException::class)
-    fun handleUnauthorizedAccessException(
-        ex: UnauthorizedException,
-        request: WebRequest
-    ): ResponseEntity<ErrorResponse> {
-        val errorResponse = ErrorResponse(
-            status = HttpStatus.FORBIDDEN.value(),
-            message = ex.message ?: "Unauthorized access",
-            timestamp = System.currentTimeMillis()
-        )
-        return ResponseEntity(errorResponse, HttpStatus.FORBIDDEN)
-    }
-
-    @ExceptionHandler(StorageException::class)
-    fun handleStorageException(ex: StorageException, request: WebRequest): ResponseEntity<ErrorResponse> {
-        val errorResponse = ErrorResponse(
-            status = HttpStatus.INTERNAL_SERVER_ERROR.value(),
-            message = ex.message ?: "Storage error occurred",
-            timestamp = System.currentTimeMillis()
-        )
-        return ResponseEntity(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR)
-    }
-
     @ExceptionHandler(IllegalArgumentException::class)
-    fun handleIllegalArgumentException(ex: IllegalArgumentException): ResponseEntity<ErrorResponse> {
-        val errorResponse = ErrorResponse(
-            status = HttpStatus.BAD_REQUEST.value(),
-            message = ex.message ?: "Illegal argument",
-            timestamp = System.currentTimeMillis()
-        )
-        return ResponseEntity(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR)
+    fun handleIllegalArgumentException(ex: IllegalArgumentException): ResponseEntity<ErrorDetails> {
+
+        val errorMessage = ex.message ?: getMessage(Constants.EXCEPTION_ILLEGAL_ARGUMENT)
+
+        return ResponseEntity(ErrorDetails(errorMessage), HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
     @ExceptionHandler(Exception::class)
@@ -119,10 +84,20 @@ class GlobalExceptionHandler {
         logger.error(">>> Global handler: Uncaught exception", e)
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Unhandled: ${e.message}")
     }
-}
 
-data class ErrorResponse(
-    val status: Int,
-    val message: String,
-    val timestamp: Long
-)
+    private fun getMessage(messageKey: String?, defaultMessageKey: String, args: Array<Any?>?): String {
+        return try {
+            messageSource.getMessage(messageKey ?: defaultMessageKey, args, Locale.ROOT)
+        } catch (e: Exception) {
+            messageSource.getMessage(defaultMessageKey, args, Locale.ROOT)
+        }
+    }
+
+    private fun getMessage(messageKey: String): String {
+        return try {
+            messageSource.getMessage(messageKey, null, Locale.ROOT)
+        } catch (e: Exception) {
+            "Message not found for key: $messageKey"
+        }
+    }
+}

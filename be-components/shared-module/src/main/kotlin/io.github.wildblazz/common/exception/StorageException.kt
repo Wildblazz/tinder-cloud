@@ -1,3 +1,7 @@
-package io.github.wildblazz.profile_service.exception
+package io.github.wildblazz.common.exception
 
-class StorageException(message: String, cause: Throwable? = null) : RuntimeException(message, cause)
+class StorageException(
+    val messageKey: String?,
+    args: Array<Any?> = emptyArray(),
+    cause: Throwable? = null
+) : ResourceException("exception.common.storage", messageKey, args, cause)

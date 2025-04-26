@@ -1,3 +1,7 @@
-package io.github.wildblazz.profile_service.exception
+package io.github.wildblazz.common.exception
 
-class UnauthorizedException(message: String) : RuntimeException(message)
+class UnauthorizedException(
+    val messageKey: String?,
+    args: Array<Any?> = emptyArray(),
+    cause: Throwable? = null
+) : ResourceException("exception.common.unauthorized", messageKey, args, cause)

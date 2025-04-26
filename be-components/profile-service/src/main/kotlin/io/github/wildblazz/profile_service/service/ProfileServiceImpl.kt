@@ -1,6 +1,8 @@
 package io.github.wildblazz.profile_service.service
 
-import io.github.wildblazz.profile_service.exception.NotFoundException
+import io.github.wildblazz.common.exception.NotFoundException
+import io.github.wildblazz.profile_service.common.Constants
+import io.github.wildblazz.profile_service.common.Constants.EXCEPTION_PROFILE_NOT_FOUND
 import io.github.wildblazz.profile_service.model.Profile
 import io.github.wildblazz.profile_service.model.dto.CreateProfileDto
 import io.github.wildblazz.profile_service.model.dto.ProfileDto
@@ -20,15 +22,14 @@ class ProfileServiceImpl(
 ) : ProfileService {
 
     override fun getProfileByUserId(userId: String): ProfileDto {
-        val profile = profileRepository.findByUserId(userId)
-            ?: throw NotFoundException("Profile for user $userId not found")
+        val profile = getUserProfile(userId)
         return mapToDto(profile)
     }
 
     @Transactional
     override fun createProfile(profileDto: CreateProfileDto): ProfileDto {
         if (profileRepository.existsByEmail(profileDto.email)) {
-            throw IllegalStateException("Profile already exists for user ${profileDto.email}")
+            throw IllegalStateException("${Constants.EXCEPTION_PROFILE_EXISTS} ${profileDto.email}")
         }
 
         val keycloakUserId = keycloakService.getOrCreateUser(profileDto)
@@ -52,9 +53,7 @@ class ProfileServiceImpl(
 
     @Transactional
     override fun updateProfile(userId: String, profileDto: UpdateProfileDto): ProfileDto {
-        val existingProfile =
-            profileRepository.findByUserId(userId)
-                ?: throw NotFoundException("Profile with id $userId not found")
+        val existingProfile = getUserProfile(userId)
 
         existingProfile.apply {
             firstName = profileDto.firstName?.takeIf { it.isNotBlank() } ?: firstName
@@ -73,9 +72,7 @@ class ProfileServiceImpl(
 
     @Transactional
     override fun deleteProfile(userId: String) {
-        val profile =
-            profileRepository.findByUserId(userId)
-                ?: throw NotFoundException("Profile with id $userId not found")
+        val profile = getUserProfile(userId)
 
         keycloakService.deleteUser(userId)
         profileRepository.delete(profile)
@@ -101,6 +98,11 @@ class ProfileServiceImpl(
         }, pageable)
 
         return profiles.map { mapToDto(it) }
+    }
+
+    private fun getUserProfile(userId: String): Profile {
+        return profileRepository.findByUserId(userId)
+            ?: throw NotFoundException(EXCEPTION_PROFILE_NOT_FOUND, arrayOf(userId))
     }
 
     private fun mapToDto(profile: Profile): ProfileDto {

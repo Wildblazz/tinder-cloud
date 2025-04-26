@@ -1,8 +1,10 @@
 package io.github.wildblazz.profile_service.service
 
-import io.github.wildblazz.profile_service.exception.NotFoundException
-import io.github.wildblazz.profile_service.exception.PhotoNotFoundException
-import io.github.wildblazz.profile_service.exception.StorageException
+import io.github.wildblazz.common.exception.NotFoundException
+import io.github.wildblazz.common.exception.PhotoNotFoundException
+import io.github.wildblazz.common.exception.StorageException
+import io.github.wildblazz.profile_service.common.Constants
+import io.github.wildblazz.profile_service.common.Constants.EXCEPTION_PROFILE_NOT_FOUND
 import io.github.wildblazz.profile_service.model.Photo
 import io.github.wildblazz.profile_service.model.Profile
 import io.github.wildblazz.profile_service.model.dto.PhotoDto
@@ -26,7 +28,7 @@ class PhotoServiceImpl(
         val profile = getUserProfile(userId)
 
         val photoCount = photoRepository.countByProfileId(profile.id)
-        if (photoCount >= 5L) throw StorageException("Exceeded max amount of photos. Remove something first")
+        if (photoCount >= 5L) throw StorageException(Constants.EXCEPTION_STORAGE_EXCEEDED)
 
 
         val fileName = "${UUID.randomUUID()}-${profile.id}"
@@ -57,8 +59,7 @@ class PhotoServiceImpl(
     override fun deletePhoto(userId: String, photoId: UUID) {
         val profile = getUserProfile(userId)
 
-        val photo = photoRepository.findByIdAndProfileId(photoId, profile.id)
-            ?: throw PhotoNotFoundException("Photo with id $photoId not found for user $userId")
+        val photo = getPhoto(photoId, profile.id)
 
         val fileName = photo.url.substringAfterLast("/")
         storageService.deleteFile(fileName)
@@ -78,8 +79,7 @@ class PhotoServiceImpl(
     override fun setMainPhoto(userId: String, photoId: UUID) {
         val profile = getUserProfile(userId)
 
-        val newMainPhoto = photoRepository.findByIdAndProfileId(photoId, profile.id)
-            ?: throw PhotoNotFoundException("Photo with id $photoId not found for user $userId")
+        val newMainPhoto = getPhoto(photoId, profile.id)
 
         val currentMainPhoto = photoRepository.findByProfileIdAndIsMainTrue(profile.id)
         currentMainPhoto?.let {
@@ -92,7 +92,10 @@ class PhotoServiceImpl(
     }
 
     private fun getUserProfile(userId: String): Profile {
-        return profileRepository.findByUserId(userId) ?: throw NotFoundException("Profile with id $userId not found")
+        return profileRepository.findByUserId(userId) ?: throw NotFoundException(
+            EXCEPTION_PROFILE_NOT_FOUND,
+            arrayOf(userId)
+        )
     }
 
     private fun mapToDto(photo: Photo): PhotoDto {
@@ -103,11 +106,16 @@ class PhotoServiceImpl(
         )
     }
 
+    private fun getPhoto(photoId: UUID, userId: UUID): Photo {
+        return photoRepository.findByIdAndProfileId(photoId, userId)
+            ?: throw PhotoNotFoundException(Constants.EXCEPTION_PHOTO_NOT_FOUND, arrayOf(photoId, userId))
+    }
+
     private fun validateFileType(file: MultipartFile) {
 //        TODO move allowed types to app.yaml
         val allowedContentTypes = listOf("image/jpeg", "image/jpg", "image/png", "image/gif")
         if (file.contentType !in allowedContentTypes) {
-            throw IllegalArgumentException("Invalid file type. Only JPG, JPEG, PNG, and GIF are allowed.")
+            throw IllegalArgumentException(Constants.EXCEPTION_ILLEGAL_FILE_TYPES)
         }
     }
 }

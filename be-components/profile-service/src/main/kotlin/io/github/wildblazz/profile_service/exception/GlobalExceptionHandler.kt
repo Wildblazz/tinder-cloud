@@ -1,7 +1,7 @@
 package io.github.wildblazz.profile_service.exception
 
-import io.github.wildblazz.common.exception.ErrorDetails
-import io.github.wildblazz.common.exception.MessageUtil
+import io.github.wildblazz.shared.exception.util.ErrorDetails
+import io.github.wildblazz.shared.exception.util.MessageUtil
 import org.springframework.context.MessageSource
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity

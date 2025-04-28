@@ -1,4 +1,4 @@
-package io.github.wildblazz.common.exception
+package io.github.wildblazz.shared.exception.types
 
 class DuplicateException(
     val messageKey: String?,

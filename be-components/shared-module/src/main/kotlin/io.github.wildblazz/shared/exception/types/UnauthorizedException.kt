@@ -1,6 +1,6 @@
-package io.github.wildblazz.common.exception
+package io.github.wildblazz.shared.exception.types
 
-class UnauthorizedException(
+class   UnauthorizedException(
     val messageKey: String?,
     args: Array<Any?> = emptyArray(),
     cause: Throwable? = null

@@ -1,6 +1,6 @@
-package io.github.wildblazz.common.exception
+package io.github.wildblazz.shared.exception.util
 
-import io.github.wildblazz.common.constants.Constants
+import io.github.wildblazz.shared.common.Constants
 import org.springframework.context.MessageSource
 import java.util.*
 

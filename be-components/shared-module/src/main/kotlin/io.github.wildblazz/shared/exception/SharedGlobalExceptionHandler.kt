@@ -1,6 +1,11 @@
-package io.github.wildblazz.common.exception
+package io.github.wildblazz.shared.exception
 
-import io.github.wildblazz.common.constants.Constants
+import io.github.wildblazz.shared.exception.util.ErrorDetails
+import io.github.wildblazz.shared.common.Constants
+import io.github.wildblazz.shared.exception.types.KeyCloakException
+import io.github.wildblazz.shared.exception.types.NotFoundException
+import io.github.wildblazz.shared.exception.types.UnauthorizedException
+import io.github.wildblazz.shared.exception.util.MessageUtil
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.MessageSource
@@ -11,7 +16,6 @@ import org.springframework.web.bind.MissingPathVariableException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.context.request.WebRequest
-import java.util.*
 
 @RestControllerAdvice
 class SharedGlobalExceptionHandler(

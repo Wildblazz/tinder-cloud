@@ -1,4 +1,4 @@
-package io.github.wildblazz.common.constants
+package io.github.wildblazz.shared.common
 
 object Constants {
     //error codes

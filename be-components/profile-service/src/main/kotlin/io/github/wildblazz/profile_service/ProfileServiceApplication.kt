@@ -4,7 +4,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.context.annotation.ComponentScan
 
-@ComponentScan(basePackages = ["io.github.wildblazz.common", "io.github.wildblazz.profile_service"])
+@ComponentScan(basePackages = ["io.github.wildblazz.shared", "io.github.wildblazz.profile_service"])
 @SpringBootApplication
 class ProfileServiceApplication
 

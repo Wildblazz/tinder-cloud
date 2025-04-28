@@ -1,4 +1,4 @@
-package io.github.wildblazz.common.exception
+package io.github.wildblazz.shared.exception.types
 
 abstract class ResourceException(
     private val defaultMessageKey: String,

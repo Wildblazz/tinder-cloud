@@ -1,7 +1,7 @@
 package io.github.wildblazz.profile_service.service
 
-import io.github.wildblazz.common.exception.KeyCloakException
-import io.github.wildblazz.common.exception.NotFoundException
+import io.github.wildblazz.shared.exception.types.KeyCloakException
+import io.github.wildblazz.shared.exception.types.NotFoundException
 import io.github.wildblazz.profile_service.common.Constants
 import io.github.wildblazz.profile_service.model.KeycloakRole
 import io.github.wildblazz.profile_service.model.KeycloakUser

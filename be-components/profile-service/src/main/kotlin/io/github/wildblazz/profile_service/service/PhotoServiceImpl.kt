@@ -1,6 +1,6 @@
 package io.github.wildblazz.profile_service.service
 
-import io.github.wildblazz.common.exception.NotFoundException
+import io.github.wildblazz.shared.exception.types.NotFoundException
 import io.github.wildblazz.profile_service.common.Constants
 import io.github.wildblazz.profile_service.common.Constants.EXCEPTION_PROFILE_NOT_FOUND
 import io.github.wildblazz.profile_service.exception.PhotoNotFoundException

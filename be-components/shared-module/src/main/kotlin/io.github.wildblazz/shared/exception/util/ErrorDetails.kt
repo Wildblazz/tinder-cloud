@@ -1,4 +1,4 @@
-package io.github.wildblazz.common.exception
+package io.github.wildblazz.shared.exception.util
 
 class ErrorDetails {
     private var messages: MutableList<String?> = ArrayList()

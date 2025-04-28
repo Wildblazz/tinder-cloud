@@ -1,4 +1,4 @@
-package io.github.wildblazz.profile_service.auth
+package io.github.wildblazz.shared.auth
 
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse

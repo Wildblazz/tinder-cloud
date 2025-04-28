@@ -1,6 +1,6 @@
 package io.github.wildblazz.profile_service.exception
 
-import io.github.wildblazz.common.exception.ResourceException
+import io.github.wildblazz.shared.exception.types.ResourceException
 
 class PhotoNotFoundException(
     val messageKey: String?,

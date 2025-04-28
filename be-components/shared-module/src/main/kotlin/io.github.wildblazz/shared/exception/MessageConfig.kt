@@ -1,4 +1,4 @@
-package io.github.wildblazz.common.exception
+package io.github.wildblazz.shared.exception
 
 import org.springframework.context.MessageSource
 import org.springframework.context.annotation.Bean
@@ -17,8 +17,6 @@ class MessageConfig {
         )
         messageSource.setDefaultEncoding("UTF-8")
 
-        println(this::class.java.classLoader.getResource("shared/messages.properties"))
-        println("1241231241241234324123412341234")
         return messageSource
     }
 }

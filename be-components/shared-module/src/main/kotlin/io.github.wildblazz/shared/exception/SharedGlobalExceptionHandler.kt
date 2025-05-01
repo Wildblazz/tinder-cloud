@@ -1,6 +1,7 @@
 package io.github.wildblazz.shared.exception
 
 import io.github.wildblazz.shared.common.Constants
+import io.github.wildblazz.shared.exception.types.DuplicateException
 import io.github.wildblazz.shared.exception.types.KeyCloakException
 import io.github.wildblazz.shared.exception.types.NotFoundException
 import io.github.wildblazz.shared.exception.types.UnauthorizedException
@@ -30,6 +31,12 @@ class SharedGlobalExceptionHandler(
     fun handleResourceNotFoundException(ex: NotFoundException): ResponseEntity<ErrorDetails> {
         val errorMessage = this.getMessage(ex.messageKey, ex.getDefaultMessageKey(), ex.getArgs())
         return ResponseEntity<ErrorDetails>(ErrorDetails(errorMessage), HttpStatus.NOT_FOUND)
+    }
+
+    @ExceptionHandler(DuplicateException::class)
+    fun handleDuplicateException(ex: DuplicateException): ResponseEntity<ErrorDetails> {
+        val errorMessage = this.getMessage(ex.messageKey, ex.getDefaultMessageKey(), ex.getArgs())
+        return ResponseEntity<ErrorDetails>(ErrorDetails(errorMessage), HttpStatus.CONFLICT)
     }
 
     @ExceptionHandler(UnauthorizedException::class)

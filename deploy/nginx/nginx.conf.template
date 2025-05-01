@@ -1,0 +1,21 @@
+events { }
+
+http {
+    server {
+        listen 80;
+
+        server_name ${DOMAIN_NAME};
+
+        location /auth {
+                proxy_pass http://${KEYCLOAK_HOST}:${KEYCLOAK_PORT}/;
+            }
+
+        location /api/profiles {
+            proxy_pass http://${PROFILES_HOST}:${PROFILES_PORT}$request_uri;
+        }
+
+        location /api/reactions {
+            proxy_pass http://${REACTIONS_HOST}:${REACTIONS_PORT}$request_uri;
+        }
+    }
+}

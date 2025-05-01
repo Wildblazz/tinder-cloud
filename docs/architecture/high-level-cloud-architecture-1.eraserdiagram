@@ -6,7 +6,9 @@ Kubernetes Cluster [icon: k8s-cluster] {
   }
 
   Storage & Database [icon: database] {
-    PostgreSQL [icon: postgresql]
+    PostgreSQL 1 [icon: postgresql]
+    PostgreSQL 2 [icon: postgresql]
+    PostgreSQL 3 [icon: postgresql]
     MongoDB [icon: mongodb]
     Redis 1 [icon: redis]
     Redis  [icon: redis]
@@ -67,10 +69,10 @@ User < Http < Recommendation Service
 // DB connections
 Auth Pod <> Auth Db: UserInfo management
 Redis 1 <> MongoDB
-Redis <> PostgreSQL
-Profile Service <> Redis <> PostgreSQL
-Match Service  <> PostgreSQL
-Reaction Service <> PostgreSQL
+Redis <> PostgreSQL 1
+Profile Service <> Redis <> PostgreSQL 1
+Match Service  <> PostgreSQL 2
+Reaction Service <> PostgreSQL 3
 Recommendation Service <> Redis 1
 
 // Storage Connection

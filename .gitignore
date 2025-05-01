@@ -24,8 +24,7 @@ hs_err_pid*
 replay_pid*
 /.idea/
 /deploy/.env
-/fe-components
 */.gradle/
 */build/
 */.kotlin/
-/be-components/like_service/
+/fe-components/

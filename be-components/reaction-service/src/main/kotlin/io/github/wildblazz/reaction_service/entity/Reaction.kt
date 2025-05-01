@@ -1,0 +1,32 @@
+package io.github.wildblazz.reaction_service.entity
+
+import io.github.wildblazz.reaction_service.model.ReactionType
+import jakarta.persistence.*
+import java.time.LocalDateTime
+import java.util.*
+
+@Entity
+@Table(
+    name = "reactions",
+    indexes = [Index(name = "idx_user_id", columnList = "userId")]
+)
+data class Reaction(
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    val id: Long?,
+
+    @Column(nullable = false)
+    val userId: UUID,
+
+    @Column(nullable = false)
+    val targetUserId: UUID,
+
+    @Column(nullable = false)
+    val type: ReactionType,
+
+    @Column(nullable = false)
+    val createdAt: LocalDateTime = LocalDateTime.now(),
+
+    @Column(nullable = false)
+    val isSuper: Boolean = false
+)

@@ -1,0 +1,23 @@
+server:
+  port: 8083
+
+spring:
+  application:
+    name: reaction-service
+  config:
+    import: "classpath:shared-application.yaml"
+  
+  datasource:
+    url: ${POSTGRES_URL:jdbc:postgresql://localhost:5432/reactions}
+    username: ${POSTGRES_USER}
+    password: ${POSTGRES_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+  messages:
+    basename: messages
+
+springdoc:
+  info:
+    title: Tinder Cloud - Reaction Service
+    description: REST API for managing user reactions in Tinder Cloud platform
+    version: 1.0.0

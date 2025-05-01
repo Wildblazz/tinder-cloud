@@ -1,16 +1,17 @@
 package io.github.wildblazz.shared.exception
 
-import io.github.wildblazz.shared.exception.util.ErrorDetails
 import io.github.wildblazz.shared.common.Constants
 import io.github.wildblazz.shared.exception.types.KeyCloakException
 import io.github.wildblazz.shared.exception.types.NotFoundException
 import io.github.wildblazz.shared.exception.types.UnauthorizedException
+import io.github.wildblazz.shared.exception.util.ErrorDetails
 import io.github.wildblazz.shared.exception.util.MessageUtil
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.MessageSource
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.MissingPathVariableException
 import org.springframework.web.bind.annotation.ExceptionHandler
@@ -72,6 +73,13 @@ class SharedGlobalExceptionHandler(
         val errorMessage = ex.message ?: getMessage(Constants.EXCEPTION_ILLEGAL_ARGUMENT)
 
         return ResponseEntity(ErrorDetails(errorMessage), HttpStatus.INTERNAL_SERVER_ERROR)
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException::class)
+    fun handleHttpMessageNotReadableException(ex: HttpMessageNotReadableException): ResponseEntity<ErrorDetails> {
+        val errorMessage = ex.message ?: getMessage(Constants.EXCEPTION_INVALID_FORMAT)
+
+        return ResponseEntity(ErrorDetails(errorMessage), HttpStatus.BAD_REQUEST)
     }
 
     @ExceptionHandler(Exception::class)

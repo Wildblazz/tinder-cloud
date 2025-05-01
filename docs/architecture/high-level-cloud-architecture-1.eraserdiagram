@@ -1,7 +1,5 @@
 cloud-architecture-diagram
 
-cloud-architecture-diagram
-
 Kubernetes Cluster [icon: k8s-cluster] {
   API Gateway & Routing  [icon: nginx] {
     NGINX Ingress Controller [icon:k8s-ingress]
@@ -24,9 +22,9 @@ Kubernetes Cluster [icon: k8s-cluster] {
     Profile Pod 2 [icon:k8s-pod]
   }
 
-  Like Service [icon: user] {
-    Like Pod [icon: k8s-pod]
-    Like Pod 2 [icon:k8s-pod]
+  Reaction Service [icon: user] {
+    Reaction Pod [icon: k8s-pod]
+    Reaction Pod 2 [icon:k8s-pod]
   }
 
   Match Service [icon: heart] {
@@ -58,10 +56,10 @@ NGINX Ingress Controller > Auth Service: Auth
 API Gateway & Routing > Match Service
 API Gateway & Routing > Recommendation Service
 API Gateway & Routing > Profile Service
-API Gateway & Routing > Like Service
+API Gateway & Routing > Reaction Service
 
 // Http Response
-User < Http < Like Service
+User < Http < Reaction Service
 User < Http < Profile Service
 User < Http < Match Service
 User < Http < Recommendation Service
@@ -72,7 +70,7 @@ Redis 1 <> MongoDB
 Redis <> PostgreSQL
 Profile Service <> Redis <> PostgreSQL
 Match Service  <> PostgreSQL
-Like Service <> PostgreSQL
+Reaction Service <> PostgreSQL
 Recommendation Service <> Redis 1
 
 // Storage Connection

@@ -1,5 +1,6 @@
 package io.github.wildblazz.profile_service.service
 
+import io.github.wildblazz.profile_service.model.Role
 import io.github.wildblazz.profile_service.model.dto.CreateProfileDto
 import org.springframework.stereotype.Service
 
@@ -13,18 +14,22 @@ class KeycloakService(
         if (existingUser != null) {
             return existingUser.id
         }
-        val newUserId = keycloakAdminClient.createUser(profileDto)
+        val keycloakId = keycloakAdminClient.createUser(profileDto)
 
-        keycloakAdminClient.assignRoleToUser(newUserId, "USER")
+        assignRole(keycloakId, Role.USER)
 
-        return newUserId
+        return keycloakId
     }
 
-    fun updateUser(userId: String, firstName: String, lastName: String, email: String) {
-        keycloakAdminClient.updateUser(userId, firstName, lastName, email)
+    fun updateUser(keycloakId: String, firstName: String, lastName: String, email: String) {
+        keycloakAdminClient.updateUser(keycloakId, firstName, lastName, email)
     }
 
-    fun deleteUser(userId: String) {
-        keycloakAdminClient.deleteUser(userId)
+    fun assignRole(keycloakId: String, role: Role) {
+        keycloakAdminClient.assignRoleToUser(keycloakId, role.name)
+    }
+
+    fun deleteUser(keycloakId: String) {
+        keycloakAdminClient.deleteUser(keycloakId)
     }
 }

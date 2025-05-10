@@ -94,10 +94,10 @@ class KeycloakAdminClient(
             ?: throw KeyCloakException(Constants.EXCEPTION_KEYCLOAK_USER_CREATION)
     }
 
-    fun assignRoleToUser(userId: String, roleName: String) {
+    fun assignRoleToUser(keycloakId: String, roleName: String) {
         val role = getRole(roleName);
         if (role != null) {
-            val url = "${keycloakAdminUrl}/users/$userId/role-mappings/realm"
+            val url = "${keycloakAdminUrl}/users/$keycloakId/role-mappings/realm"
             val headers = HttpHeaders().apply {
                 set("Authorization", "Bearer ${getAccessToken()}")
                 set("Content-Type", "application/json")
@@ -128,8 +128,8 @@ class KeycloakAdminClient(
         }
     }
 
-    fun updateUser(userId: String, firstName: String, lastName: String, email: String) {
-        val url = "${keycloakAdminUrl}/users/$userId"
+    fun updateUser(keycloakId: String, firstName: String, lastName: String, email: String) {
+        val url = "${keycloakAdminUrl}/users/$keycloakId"
         val headers = HttpHeaders().apply {
             set("Authorization", "Bearer ${getAccessToken()}")
             set("Content-Type", "application/json")
@@ -144,8 +144,8 @@ class KeycloakAdminClient(
         )
     }
 
-    fun deleteUser(userId: String) {
-        val url = "${keycloakAdminUrl}/users/$userId"
+    fun deleteUser(keycloakId: String) {
+        val url = "${keycloakAdminUrl}/users/$keycloakId"
         val headers = HttpHeaders().apply {
             set("Authorization", "Bearer ${getAccessToken()}")
         }

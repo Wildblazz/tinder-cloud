@@ -13,6 +13,7 @@ import org.springframework.context.MessageSource
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.HttpMessageNotReadableException
+import org.springframework.security.authorization.AuthorizationDeniedException
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.MissingPathVariableException
 import org.springframework.web.bind.annotation.ExceptionHandler
@@ -73,6 +74,12 @@ class SharedGlobalExceptionHandler(
     fun handleIllegalArgumentException(ex: IllegalArgumentException): ResponseEntity<ErrorDetails> {
         val errorMessage = ex.message ?: getMessage(Constants.EXCEPTION_ILLEGAL_ARGUMENT)
         return ResponseEntity(ErrorDetails(errorMessage), HttpStatus.INTERNAL_SERVER_ERROR)
+    }
+
+    @ExceptionHandler(AuthorizationDeniedException::class)
+    fun handleAuthorizationDeniedException(ex: AuthorizationDeniedException): ResponseEntity<ErrorDetails> {
+        val errorMessage = ex.message ?: getMessage(Constants.EXCEPTION_ILLEGAL_ARGUMENT)
+        return ResponseEntity(ErrorDetails(errorMessage), HttpStatus.UNAUTHORIZED)
     }
 
     @ExceptionHandler(IllegalStateException::class)

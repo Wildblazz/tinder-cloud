@@ -23,9 +23,9 @@ class PhotoServiceImpl(
 ) : PhotoService {
 
     @Transactional
-    override fun uploadPhoto(userId: String, file: MultipartFile): PhotoDto {
+    override fun uploadPhoto(keycloakId: String, file: MultipartFile): PhotoDto {
         validateFileType(file)
-        val profile = getUserProfile(userId)
+        val profile = getUserProfile(keycloakId)
 
         val photoCount = photoRepository.countByProfileId(profile.id)
         if (photoCount >= 5L) throw StorageException(Constants.EXCEPTION_STORAGE_EXCEEDED)
@@ -48,16 +48,16 @@ class PhotoServiceImpl(
         return mapToDto(savedPhoto)
     }
 
-    override fun getPhotosByProfileId(userId: String): List<PhotoDto> {
-        val profile = getUserProfile(userId)
+    override fun getPhotosByProfileId(keycloakId: String): List<PhotoDto> {
+        val profile = getUserProfile(keycloakId)
 
         val photos = photoRepository.findByProfileIdOrderByIsMainDesc(profile.id)
         return photos.map { mapToDto(it) }
     }
 
     @Transactional
-    override fun deletePhoto(userId: String, photoId: UUID) {
-        val profile = getUserProfile(userId)
+    override fun deletePhoto(keycloakId: String, photoId: UUID) {
+        val profile = getUserProfile(keycloakId)
 
         val photo = getPhoto(photoId, profile.id)
 
@@ -76,8 +76,8 @@ class PhotoServiceImpl(
     }
 
     @Transactional
-    override fun setMainPhoto(userId: String, photoId: UUID) {
-        val profile = getUserProfile(userId)
+    override fun setMainPhoto(keycloakId: String, photoId: UUID) {
+        val profile = getUserProfile(keycloakId)
 
         val newMainPhoto = getPhoto(photoId, profile.id)
 
@@ -91,10 +91,10 @@ class PhotoServiceImpl(
         photoRepository.save(newMainPhoto)
     }
 
-    private fun getUserProfile(userId: String): Profile {
-        return profileRepository.findByUserId(userId) ?: throw NotFoundException(
+    private fun getUserProfile(keycloakId: String): Profile {
+        return profileRepository.findByKeycloakId(keycloakId) ?: throw NotFoundException(
             EXCEPTION_PROFILE_NOT_FOUND,
-            arrayOf(userId)
+            arrayOf(keycloakId)
         )
     }
 

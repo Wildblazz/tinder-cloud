@@ -4,6 +4,7 @@ import io.github.wildblazz.profile_service.model.dto.CreateProfileDto
 import io.github.wildblazz.profile_service.model.dto.ProfileDto
 import io.github.wildblazz.profile_service.model.dto.SearchCriteria
 import io.github.wildblazz.profile_service.model.dto.UpdateProfileDto
+import io.github.wildblazz.profile_service.model.dto.UpdateRoleDto
 import io.github.wildblazz.profile_service.service.ProfileService
 import jakarta.validation.Valid
 import org.springframework.data.domain.Page
@@ -23,14 +24,13 @@ class ProfileController(private val profileService: ProfileService) {
 
     @GetMapping("/{userId}")
     fun getProfile(@PathVariable userId: String): ResponseEntity<ProfileDto> {
-        val profile = profileService.getProfileByUserId(userId)
+        val profile = profileService.getProfileByKeycloakId(userId)
         return ResponseEntity.ok(profile)
     }
 
     @GetMapping("/me")
     fun getCurrentUserProfile(@AuthenticationPrincipal jwt: Jwt): ResponseEntity<ProfileDto> {
-        val userId = jwt.subject
-        val profile = profileService.getProfileByUserId(userId)
+        val profile = profileService.getProfileByKeycloakId(jwt.subject)
         return ResponseEntity.ok(profile)
     }
 
@@ -43,22 +43,32 @@ class ProfileController(private val profileService: ProfileService) {
         return ResponseEntity.status(HttpStatus.CREATED).body(savedProfile)
     }
 
-    @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or #id == authentication.name")
+    @PostMapping("/{userId}/role")
+    @PreAuthorize("hasRole('ADMIN')")
+    fun updateRole(
+        @RequestBody @Valid roleDto: UpdateRoleDto,
+        @PathVariable userId: String
+    ): ResponseEntity<Unit> {
+        profileService.updateUserRole(userId, roleDto)
+        return ResponseEntity.noContent().build()
+    }
+
+    @PutMapping("/{userId}")
+    @PreAuthorize("hasRole('ADMIN') or #userId == authentication.name")
     fun updateProfile(
-        @PathVariable id: String,
+        @PathVariable userId: String,
         @RequestBody @Valid profileDto: UpdateProfileDto,
     ): ResponseEntity<ProfileDto> {
-        val updatedProfile = profileService.updateProfile(id, profileDto)
+        val updatedProfile = profileService.updateProfile(userId, profileDto)
         return ResponseEntity.ok(updatedProfile)
     }
 
-    @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or #id == authentication.name")
+    @DeleteMapping("/{userId}")
+    @PreAuthorize("hasRole('ADMIN') or #userId == authentication.name")
     fun deleteProfile(
-        @PathVariable id: String
+        @PathVariable userId: String
     ): ResponseEntity<Unit> {
-        profileService.deleteProfile(id)
+        profileService.deleteProfile(userId)
         return ResponseEntity.noContent().build()
     }
 

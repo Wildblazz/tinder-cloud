@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: recommendation-service
+  config:
+    import: "classpath:shared-application.yaml"
+  kafka:
+    consumer:
+      group-id: recommendation-service
+
+springdoc:
+  info:
+    title: Tinder Cloud - Recommendation Service
+    description: Service for preparing recommendations to the users in Tinder Cloud platform
+    version: 1.0.0

@@ -21,6 +21,21 @@ spring:
         provider:
           keycloak:
             issuer-uri: ${keycloak.issuer-url}
+  kafka:
+    bootstrap-servers: ${KAFKA_HOST:localhost:9093}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    admin:
+      properties:
+        bootstrap.servers: {KAFKA_HOST:localhost:9093}
+    consumer:
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: io.github.wildblazz.shared.event.model
+
   jpa:
     hibernate:
       ddl-auto: update
@@ -52,3 +67,8 @@ springdoc:
     enabled: true
   swagger-ui:
     enabled: true
+
+kafka:
+  default-partitions: 2
+  partitions:
+    profile-delete-event: 3

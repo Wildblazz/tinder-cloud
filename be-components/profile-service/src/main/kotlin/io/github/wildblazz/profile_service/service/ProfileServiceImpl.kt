@@ -1,15 +1,15 @@
 package io.github.wildblazz.profile_service.service
 
-import io.github.wildblazz.shared.exception.types.DuplicateException
-import io.github.wildblazz.shared.exception.types.NotFoundException
 import io.github.wildblazz.profile_service.common.Constants
 import io.github.wildblazz.profile_service.common.Constants.EXCEPTION_PROFILE_NOT_FOUND
 import io.github.wildblazz.profile_service.model.Profile
-import io.github.wildblazz.profile_service.model.dto.CreateProfileDto
-import io.github.wildblazz.profile_service.model.dto.ProfileDto
-import io.github.wildblazz.profile_service.model.dto.SearchCriteria
-import io.github.wildblazz.profile_service.model.dto.UpdateProfileDto
+import io.github.wildblazz.profile_service.model.dto.*
 import io.github.wildblazz.profile_service.repository.ProfileRepository
+import io.github.wildblazz.shared.event.model.ProfileCreateEvent
+import io.github.wildblazz.shared.event.model.ProfileDeleteEvent
+import io.github.wildblazz.shared.event.service.EventService
+import io.github.wildblazz.shared.exception.types.DuplicateException
+import io.github.wildblazz.shared.exception.types.NotFoundException
 import jakarta.persistence.criteria.Predicate
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
@@ -19,11 +19,12 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class ProfileServiceImpl(
     private val profileRepository: ProfileRepository,
-    private val keycloakService: KeycloakService
+    private val keycloakService: KeycloakService,
+    private val eventService: EventService
 ) : ProfileService {
 
-    override fun getProfileByUserId(userId: String): ProfileDto {
-        val profile = getUserProfile(userId)
+    override fun getProfileByKeycloakId(keycloakId: String): ProfileDto {
+        val profile = getUserProfile(keycloakId)
         return mapToDto(profile)
     }
 
@@ -33,10 +34,10 @@ class ProfileServiceImpl(
             throw DuplicateException(Constants.EXCEPTION_PROFILE_DUPLICATE, arrayOf(profileDto.email))
         }
 
-        val keycloakUserId = keycloakService.getOrCreateUser(profileDto)
+        val keycloakId = keycloakService.getOrCreateUser(profileDto)
 
         val profile = Profile(
-            userId = keycloakUserId,
+            keycloakId = keycloakId,
             email = profileDto.email,
             userName = profileDto.userName,
             firstName = profileDto.firstName,
@@ -49,12 +50,21 @@ class ProfileServiceImpl(
         )
 
         val savedProfile = profileRepository.save(profile)
+
+        eventService.publish(ProfileCreateEvent(
+            keycloakId = profile.keycloakId,
+            userName = profileDto.userName,
+            firstName = profileDto.firstName,
+            lastName = profileDto.lastName,
+            location = profileDto.location,
+        ))
+
         return mapToDto(savedProfile)
     }
 
     @Transactional
-    override fun updateProfile(userId: String, profileDto: UpdateProfileDto): ProfileDto {
-        val existingProfile = getUserProfile(userId)
+    override fun updateProfile(keycloakId: String, profileDto: UpdateProfileDto): ProfileDto {
+        val existingProfile = getUserProfile(keycloakId)
 
         existingProfile.apply {
             firstName = profileDto.firstName?.takeIf { it.isNotBlank() } ?: firstName
@@ -65,18 +75,25 @@ class ProfileServiceImpl(
             interests = profileDto.interests?.takeIf { it.isNotEmpty() } ?: interests
         }
 
-        keycloakService.updateUser(userId, existingProfile.firstName, existingProfile.lastName, existingProfile.email)
+        keycloakService.updateUser(
+            keycloakId,
+            existingProfile.firstName,
+            existingProfile.lastName,
+            existingProfile.email
+        )
 
         val updatedProfile = profileRepository.save(existingProfile)
         return mapToDto(updatedProfile)
     }
 
     @Transactional
-    override fun deleteProfile(userId: String) {
-        val profile = getUserProfile(userId)
+    override fun deleteProfile(keycloakId: String) {
+        val profile = getUserProfile(keycloakId)
 
-        keycloakService.deleteUser(userId)
+        keycloakService.deleteUser(keycloakId)
         profileRepository.delete(profile)
+
+        eventService.publish(ProfileDeleteEvent(keycloakId = profile.keycloakId))
     }
 
     override fun searchProfiles(criteria: SearchCriteria, page: Int, size: Int): Page<ProfileDto> {
@@ -101,14 +118,19 @@ class ProfileServiceImpl(
         return profiles.map { mapToDto(it) }
     }
 
-    private fun getUserProfile(userId: String): Profile {
-        return profileRepository.findByUserId(userId)
-            ?: throw NotFoundException(EXCEPTION_PROFILE_NOT_FOUND, arrayOf(userId))
+    override fun updateUserRole(userId: String, roleDto: UpdateRoleDto) {
+        val user = getUserProfile(userId)
+        keycloakService.assignRole(user.keycloakId, roleDto.role)
+    }
+
+    private fun getUserProfile(keycloakId: String): Profile {
+        return profileRepository.findByKeycloakId(keycloakId)
+            ?: throw NotFoundException(EXCEPTION_PROFILE_NOT_FOUND, arrayOf(keycloakId))
     }
 
     private fun mapToDto(profile: Profile): ProfileDto {
         return ProfileDto(
-            userId = profile.userId,
+            keyCloakId = profile.keycloakId,
             userName = profile.userName,
             firstName = profile.firstName,
             lastName = profile.lastName,

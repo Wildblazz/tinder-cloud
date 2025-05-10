@@ -8,14 +8,14 @@ import java.util.*
 @Entity
 @Table(
     name = "profiles",
-    indexes = [Index(name = "idx_user_id", columnList = "userId")]
+    indexes = [Index(name = "idx_keycloak_id", columnList = "keycloakId")]
 )
 data class Profile(
     @Id
     var id: UUID = UUID.randomUUID(),
 
     @Column(nullable = false, unique = true)
-    var userId: String,
+    var keycloakId: String,
 
     @Column(nullable = false, unique = true)
     var userName: String,

@@ -16,10 +16,10 @@ data class Reaction(
     val id: Long?,
 
     @Column(nullable = false)
-    val userId: UUID,
+    val userId: String,
 
     @Column(nullable = false)
-    val targetUserId: UUID,
+    val targetUserId: String,
 
     @Column(nullable = false)
     val type: ReactionType,

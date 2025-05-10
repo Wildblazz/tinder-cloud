@@ -14,7 +14,6 @@ import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 import java.time.LocalDateTime
-import java.util.*
 
 @Validated
 @RestController
@@ -36,7 +35,7 @@ class ReactionController(private val reactionService: ReactionService) {
     @Operation(summary = "Get all user reactions with pagination and timeframes")
     @PreAuthorize("hasRole('ADMIN') or #userId == authentication.name")
     fun getReactionsByUserId(
-        @PathVariable userId: UUID,
+        @PathVariable userId: String,
         @RequestParam(required = false) startTime: LocalDateTime?,
         @RequestParam(required = false) endTime: LocalDateTime?,
         @RequestParam(defaultValue = "0") page: Int,
@@ -51,7 +50,7 @@ class ReactionController(private val reactionService: ReactionService) {
     @Operation(summary = "Delete reaction")
     @PreAuthorize("hasRole('ADMIN') or #userId == authentication.name")
     fun deleteReaction(
-        @PathVariable userId: UUID, @PathVariable reactionId: Long
+        @PathVariable userId: String, @PathVariable reactionId: Long
     ): ResponseEntity<Void> {
         reactionService.deleteReaction(userId, reactionId)
         return ResponseEntity.noContent().build()

@@ -6,6 +6,9 @@ spring:
     name: reaction-service
   config:
     import: "classpath:shared-application.yaml"
+  kafka:
+    consumer:
+      group-id: reaction-service
   
   datasource:
     url: ${POSTGRES_URL:jdbc:postgresql://localhost:5432/reactions}

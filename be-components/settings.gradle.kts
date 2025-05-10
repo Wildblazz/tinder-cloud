@@ -1,6 +1,6 @@
 rootProject.name = "tinder-cloud-be-components"
 
-include(":shared-module", ":profile-service", ":reaction-service")
+include(":shared-module", ":profile-service", ":reaction-service", ":recommendation-service", ":match-service")
 
 dependencyResolutionManagement {
     repositories {

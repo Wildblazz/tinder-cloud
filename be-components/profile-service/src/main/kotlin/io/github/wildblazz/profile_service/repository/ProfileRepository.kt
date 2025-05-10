@@ -7,7 +7,6 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor
 import java.util.*
 
 interface ProfileRepository : JpaRepository<Profile, UUID>, JpaSpecificationExecutor<Profile> {
-    fun findByUserId(userId: String): Profile?
+    fun findByKeycloakId(keycloakId: String): Profile?
     fun existsByEmail(email: String): Boolean
-    fun existsByUserId(userId: String): Boolean
 }

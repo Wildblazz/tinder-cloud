@@ -6,7 +6,7 @@ plugins {
     kotlin("jvm") version "2.1.20"
     kotlin("plugin.spring") version "2.1.20"
     kotlin("plugin.jpa") version "2.1.20"
-    id("org.springframework.boot") version "3.4.4"
+    id("org.springframework.boot") version "3.4.5"
     id("io.spring.dependency-management") version "1.1.7"
 }
 
@@ -25,6 +25,7 @@ allprojects {
         implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
         implementation("org.springframework.boot:spring-boot-starter-security")
         implementation("org.springframework.boot:spring-boot-starter-web")
+        implementation("org.springframework.kafka:spring-kafka")
         implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
         implementation("org.postgresql:postgresql:42.7.5")
         implementation("org.jetbrains.kotlin:kotlin-reflect")
@@ -36,6 +37,7 @@ allprojects {
         testImplementation("org.springframework.security:spring-security-test")
         testRuntimeOnly("org.junit.platform:junit-platform-launcher")
         implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.6")
+        implementation("io.github.classgraph:classgraph:4.8.179")
     }
 
     repositories {

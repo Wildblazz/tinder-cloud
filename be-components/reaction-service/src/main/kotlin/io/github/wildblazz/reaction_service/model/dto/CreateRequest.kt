@@ -2,11 +2,10 @@ package io.github.wildblazz.reaction_service.model.dto
 
 import io.github.wildblazz.reaction_service.model.ReactionType
 import jakarta.validation.constraints.NotNull
-import java.util.*
 
 data class CreateRequest(
     @field:NotNull
-    val targetUserId: UUID,
+    val targetUserId: String,
     @field:NotNull
     val reactionType: ReactionType,
 

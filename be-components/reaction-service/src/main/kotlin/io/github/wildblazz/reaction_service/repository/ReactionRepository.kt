@@ -10,9 +10,10 @@ import java.util.*
 
 @Repository
 interface ReactionRepository : JpaRepository<Reaction, Long> {
-    fun findByUserIdAndTargetUserId(userId: UUID, targetUserId: UUID): Reaction?
-    fun findByIdAndUserId(reactionId: Long, userId: UUID): Optional<Reaction>
+    fun findByUserIdAndTargetUserId(userId: String, targetUserId: String): Reaction?
+    fun findByIdAndUserId(reactionId: Long, userId: String): Optional<Reaction>
     fun findByUserIdAndCreatedAtBetween(
-        userId: UUID, startTime: LocalDateTime, endTime: LocalDateTime, pageable: Pageable
+        userId: String, startTime: LocalDateTime, endTime: LocalDateTime, pageable: Pageable
     ): Page<Reaction>
+    fun deleteAllByUserIdOrTargetUserId(userId: String, targetUserId: String)
 }

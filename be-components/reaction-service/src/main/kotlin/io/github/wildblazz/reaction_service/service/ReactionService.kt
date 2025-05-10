@@ -10,7 +10,6 @@ import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
-import java.util.*
 
 @Service
 class ReactionService(
@@ -18,17 +17,15 @@ class ReactionService(
 ) {
     @Transactional
     fun createReaction(userId: String, request: CreateRequest): Reaction {
-        val userIdUuid = UUID.fromString(userId)
 
-
-        val existingReaction = reactionRepository.findByUserIdAndTargetUserId(userIdUuid, request.targetUserId)
+        val existingReaction = reactionRepository.findByUserIdAndTargetUserId(userId, request.targetUserId)
         if (existingReaction != null) {
             return existingReaction
         }
 
         val reaction = Reaction(
             id = null,
-            userId = userIdUuid,
+            userId = userId,
             targetUserId = request.targetUserId,
             type = request.reactionType,
             isSuper = request.isSuper
@@ -39,20 +36,24 @@ class ReactionService(
 
     @Transactional(readOnly = true)
     fun getReactionsByUserId(
-        userId: UUID, startTime: LocalDateTime?, endTime: LocalDateTime?, pageable: Pageable
+        userId: String, startTime: LocalDateTime?, endTime: LocalDateTime?, pageable: Pageable
     ): Page<Reaction> {
         return reactionRepository.findByUserIdAndCreatedAtBetween(
             userId, startTime ?: LocalDateTime.MIN, endTime ?: LocalDateTime.MAX, pageable
         )
     }
 
-    fun deleteReaction(userId: UUID, id: Long) {
+    fun deleteReaction(userId: String, id: Long) {
         val reaction = getReactionById(userId, id)
         reactionRepository.delete(reaction)
     }
 
-    private fun getReactionById(userId: UUID, id: Long): Reaction {
+    private fun getReactionById(userId: String, id: Long): Reaction {
         return reactionRepository.findByIdAndUserId(id, userId)
             .orElseThrow { NotFoundException(Constants.MESSAGE_REACTION_NOT_FOUND, arrayOf(id)) }
+    }
+
+    fun deleteReactionsByUserId(userId: String) {
+        reactionRepository.deleteAllByUserIdOrTargetUserId(userId, userId);
     }
 }

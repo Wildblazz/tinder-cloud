@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: match-service
+  config:
+    import: "classpath:shared-application.yaml"
+  kafka:
+    consumer:
+      group-id: match-service
+
+springdoc:
+  info:
+    title: Tinder Cloud - Match Service
+    description: Service that handles matches between user profiles on the Tinder cloud platform.
+    version: 1.0.0

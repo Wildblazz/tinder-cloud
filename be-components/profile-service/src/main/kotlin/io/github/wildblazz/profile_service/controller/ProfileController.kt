@@ -1,10 +1,6 @@
 package io.github.wildblazz.profile_service.controller
 
-import io.github.wildblazz.profile_service.model.dto.CreateProfileDto
-import io.github.wildblazz.profile_service.model.dto.ProfileDto
-import io.github.wildblazz.profile_service.model.dto.SearchCriteria
-import io.github.wildblazz.profile_service.model.dto.UpdateProfileDto
-import io.github.wildblazz.profile_service.model.dto.UpdateRoleDto
+import io.github.wildblazz.profile_service.model.dto.*
 import io.github.wildblazz.profile_service.service.ProfileService
 import jakarta.validation.Valid
 import org.springframework.data.domain.Page

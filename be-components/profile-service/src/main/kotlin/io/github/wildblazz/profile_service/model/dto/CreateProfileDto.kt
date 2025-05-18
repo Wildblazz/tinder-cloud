@@ -1,10 +1,10 @@
 package io.github.wildblazz.profile_service.model.dto
 
+import io.github.wildblazz.profile_service.model.Coordinates
+import io.github.wildblazz.profile_service.model.Gender
 import jakarta.validation.Valid
-import jakarta.validation.constraints.Email
-import jakarta.validation.constraints.Max
-import jakarta.validation.constraints.Min
-import jakarta.validation.constraints.Size
+import jakarta.validation.constraints.*
+import java.time.LocalDate
 
 data class CreateProfileDto(
     @field:Size(min = 3, max = 32, message = "Username must be between 3 and 32 characters")
@@ -22,22 +22,29 @@ data class CreateProfileDto(
     @field:Email(message = "Email must be valid")
     val email: String,
 
-    @field:Max(value = 120, message = "Age must not exceed 120")
-    @field:Min(value = 0, message = "Age must be at least 0")
-    val age: Int,
+    @field:NotNull(message = "Birth date must not be null")
+    val birthDate: LocalDate,
 
-    @field:Size(min = 1, max = 16, message = "Gender must be between 1 and 16 characters")
-    val gender: String,
+    @field:NotNull(message = "Gender must not be null")
+    val gender: Gender,
+
+    @field:NotNull(message = "Target gender must not be null")
+    val targetGender: Gender,
+
+    @field:Min(value = 1, message = "Search radius must be at least 1 km")
+    @field:Max(value = 100, message = "Search radius must not exceed 100 km")
+    val searchRadiusKm: Int = 30,
+
+    @field:Valid
+    val coordinates: Coordinates? = null,
+
+    @field:NotNull(message = "City must not be null")
+    @field:Size(max = 128, message = "City must not exceed 128 characters")
+    val city: String,
 
     @field:Size(max = 256, message = "Bio must not exceed 256 characters")
     val bio: String? = null,
 
-    @field:Size(max = 128, message = "Location must not exceed 128 characters")
-    val location: String? = null,
-
     @field:Valid
-    val interests: List<@Size(max = 32, message = "Each interest must not exceed 32 characters") String> = emptyList(),
-
-    @field:Valid
-    val photos: List<@Size(max = 256, message = "Each photo URL must not exceed 256 characters") String> = emptyList()
+    val interests: List<@Size(max = 32, message = "Each interest must not exceed 32 characters") String> = emptyList()
 )

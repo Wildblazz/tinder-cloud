@@ -2,6 +2,7 @@ package io.github.wildblazz.profile_service.model
 
 
 import jakarta.persistence.*
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.*
 
@@ -18,10 +19,10 @@ data class Profile(
     var keycloakId: String,
 
     @Column(nullable = false, unique = true)
-    var userName: String,
+    var email: String,
 
     @Column(nullable = false, unique = true)
-    var email: String,
+    var userName: String,
 
     @Column(nullable = false)
     var firstName: String,
@@ -29,34 +30,43 @@ data class Profile(
     @Column(nullable = false)
     var lastName: String,
 
-    @Column(nullable = false)
-    var age: Int,
+    @Column(name = "birth_date")
+    val birthDate: LocalDate,
 
     @Column(nullable = false)
-    var gender: String,
+    val gender: Gender,
+
+    @Column(nullable = false)
+    var targetGender: Gender,
+
+    @Column(name = "search_radius_km")
+    var searchRadiusKm: Int = 30,
+
+    @Embedded
+    var coordinates: Coordinates?,
+
+    @Column(nullable = false)
+    var city: String,
 
     @Column(columnDefinition = "TEXT")
-    var bio: String? = null,
-
-//    TODO add PostGIS support
-    var location: String? = null,
+    var bio: String?,
 
     @ElementCollection
     @CollectionTable(name = "profile_interests", joinColumns = [JoinColumn(name = "profile_id")])
     @Column(name = "interest")
-    var interests: List<String> = listOf(),
+    var interests: List<String>,
 
     @OneToMany(mappedBy = "profile", cascade = [CascadeType.ALL], orphanRemoval = true)
-    var photos: MutableList<Photo> = mutableListOf(),
+    val photos: MutableList<Photo> = mutableListOf(),
+
+    @Column(name = "last_active_at", nullable = false)
+    var lastActiveAt: LocalDateTime = LocalDateTime.now(),
 
     @Column(nullable = false)
     var createdAt: LocalDateTime = LocalDateTime.now(),
-
-    @Column(nullable = false)
-    var updatedAt: LocalDateTime = LocalDateTime.now()
 ) {
     @PreUpdate
     fun onUpdate() {
-        updatedAt = LocalDateTime.now()
+        lastActiveAt = LocalDateTime.now()
     }
 }

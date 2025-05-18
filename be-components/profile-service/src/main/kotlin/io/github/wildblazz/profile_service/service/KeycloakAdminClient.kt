@@ -1,11 +1,11 @@
 package io.github.wildblazz.profile_service.service
 
-import io.github.wildblazz.shared.exception.types.KeyCloakException
-import io.github.wildblazz.shared.exception.types.NotFoundException
 import io.github.wildblazz.profile_service.common.Constants
 import io.github.wildblazz.profile_service.model.KeycloakRole
 import io.github.wildblazz.profile_service.model.KeycloakUser
 import io.github.wildblazz.profile_service.model.dto.CreateProfileDto
+import io.github.wildblazz.shared.exception.types.KeyCloakException
+import io.github.wildblazz.shared.exception.types.NotFoundException
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders

@@ -1,6 +1,5 @@
 package io.github.wildblazz.profile_service.service
 
-import io.github.wildblazz.shared.exception.types.NotFoundException
 import io.github.wildblazz.profile_service.common.Constants
 import io.github.wildblazz.profile_service.common.Constants.EXCEPTION_PROFILE_NOT_FOUND
 import io.github.wildblazz.profile_service.exception.PhotoNotFoundException
@@ -10,6 +9,7 @@ import io.github.wildblazz.profile_service.model.Profile
 import io.github.wildblazz.profile_service.model.dto.PhotoDto
 import io.github.wildblazz.profile_service.repository.PhotoRepository
 import io.github.wildblazz.profile_service.repository.ProfileRepository
+import io.github.wildblazz.shared.exception.types.NotFoundException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.web.multipart.MultipartFile

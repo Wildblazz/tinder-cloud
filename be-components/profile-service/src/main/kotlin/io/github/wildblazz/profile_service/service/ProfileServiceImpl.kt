@@ -7,6 +7,7 @@ import io.github.wildblazz.profile_service.model.dto.*
 import io.github.wildblazz.profile_service.repository.ProfileRepository
 import io.github.wildblazz.shared.event.model.ProfileCreateEvent
 import io.github.wildblazz.shared.event.model.ProfileDeleteEvent
+import io.github.wildblazz.shared.event.model.ProfileUpdateEvent
 import io.github.wildblazz.shared.event.service.EventService
 import io.github.wildblazz.shared.exception.types.DuplicateException
 import io.github.wildblazz.shared.exception.types.NotFoundException
@@ -15,6 +16,8 @@ import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDate
+import java.time.Period
 
 @Service
 class ProfileServiceImpl(
@@ -36,28 +39,39 @@ class ProfileServiceImpl(
 
         val keycloakId = keycloakService.getOrCreateUser(profileDto)
 
-        val profile = Profile(
-            keycloakId = keycloakId,
-            email = profileDto.email,
-            userName = profileDto.userName,
-            firstName = profileDto.firstName,
-            lastName = profileDto.lastName,
-            age = profileDto.age,
-            gender = profileDto.gender,
-            bio = profileDto.bio,
-            location = profileDto.location,
-            interests = profileDto.interests
-        )
+        val profile = profileDto.run {
+            Profile(
+                keycloakId = keycloakId,
+                email = email,
+                userName = userName,
+                firstName = firstName,
+                lastName = lastName,
+                coordinates = coordinates,
+                city = city,
+                gender = gender,
+                bio = bio,
+                interests = interests,
+                birthDate = birthDate,
+                targetGender = targetGender,
+                searchRadiusKm = searchRadiusKm,
+            )
+        }
 
         val savedProfile = profileRepository.save(profile)
 
-        eventService.publish(ProfileCreateEvent(
-            keycloakId = profile.keycloakId,
-            userName = profileDto.userName,
-            firstName = profileDto.firstName,
-            lastName = profileDto.lastName,
-            location = profileDto.location,
-        ))
+        eventService.publish(
+            profileDto.run {
+                ProfileCreateEvent(
+                    keycloakId = profile.keycloakId,
+                    userName = userName,
+                    firstName = firstName,
+                    lastName = lastName,
+                    city = city,
+                    latitude = coordinates?.latitude,
+                    longitude = coordinates?.longitude,
+                )
+            }
+        )
 
         return mapToDto(savedProfile)
     }
@@ -65,13 +79,16 @@ class ProfileServiceImpl(
     @Transactional
     override fun updateProfile(keycloakId: String, profileDto: UpdateProfileDto): ProfileDto {
         val existingProfile = getUserProfile(keycloakId)
+        profileDto.email?.let { isProfileExistsByEmail(it) }
 
         existingProfile.apply {
             firstName = profileDto.firstName?.takeIf { it.isNotBlank() } ?: firstName
             lastName = profileDto.lastName?.takeIf { it.isNotBlank() } ?: lastName
             email = profileDto.email?.takeIf { it.isNotBlank() } ?: email
+            searchRadiusKm = profileDto.searchRadiusKm.takeIf { true } ?: searchRadiusKm
+            coordinates = profileDto.coordinates?.takeIf { true } ?: coordinates
+            city = profileDto.city?.takeIf { it.isNotBlank() } ?: city
             bio = profileDto.bio?.takeIf { it.isNotBlank() } ?: bio
-            location = profileDto.location?.takeIf { it.isNotBlank() } ?: location
             interests = profileDto.interests?.takeIf { it.isNotEmpty() } ?: interests
         }
 
@@ -83,6 +100,21 @@ class ProfileServiceImpl(
         )
 
         val updatedProfile = profileRepository.save(existingProfile)
+
+        eventService.publish(
+            existingProfile.run {
+                ProfileUpdateEvent(
+                    keycloakId = keycloakId,
+                    firstName = firstName,
+                    lastName = lastName,
+                    searchRadiusKm = searchRadiusKm,
+                    interests = interests,
+                    city = city,
+                    latitude = coordinates?.latitude,
+                    longitude = coordinates?.longitude,
+                )
+            }
+        )
         return mapToDto(updatedProfile)
     }
 
@@ -104,6 +136,7 @@ class ProfileServiceImpl(
 
             criteria.age?.let { predicates.add(cb.equal(root.get<Int>("age"), it)) }
             criteria.gender?.let { predicates.add(cb.equal(root.get<String>("gender"), it)) }
+//            todo - transfer to recommendation service?
             criteria.location?.let { predicates.add(cb.like(cb.lower(root.get("location")), "%${it.lowercase()}%")) }
             criteria.bio?.let { predicates.add(cb.like(cb.lower(root.get("bio")), "%${it.lowercase()}%")) }
             criteria.interests?.let { interests ->
@@ -123,6 +156,12 @@ class ProfileServiceImpl(
         keycloakService.assignRole(user.keycloakId, roleDto.role)
     }
 
+    override fun isProfileExistsByEmail(email: String) {
+        if (profileRepository.existsByEmail(email)) {
+            throw DuplicateException(Constants.EXCEPTION_PROFILE_DUPLICATE, arrayOf(email))
+        }
+    }
+
     private fun getUserProfile(keycloakId: String): Profile {
         return profileRepository.findByKeycloakId(keycloakId)
             ?: throw NotFoundException(EXCEPTION_PROFILE_NOT_FOUND, arrayOf(keycloakId))
@@ -135,12 +174,13 @@ class ProfileServiceImpl(
             firstName = profile.firstName,
             lastName = profile.lastName,
             email = profile.email,
-            age = profile.age,
+            birthDate = profile.birthDate,
+            age = Period.between(profile.birthDate, LocalDate.now()).years,
             gender = profile.gender,
             bio = profile.bio,
-            location = profile.location,
+            city = profile.city,
             interests = profile.interests,
-            photos = profile.photos?.map { it.url } ?: emptyList()
+            photos = profile.photos.map { it.url }
         )
     }
 }

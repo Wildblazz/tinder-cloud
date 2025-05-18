@@ -1,12 +1,13 @@
 package io.github.wildblazz.shared.event.model
 
-class ProfileCreateEvent(
+class ProfileUpdateEvent(
     val keycloakId: String,
-    val userName: String,
     val firstName: String,
     val lastName: String,
+    val searchRadiusKm: Int,
     val latitude: Double?,
     val longitude: Double?,
     val city: String,
-    override var eventType: String = "PROFILE_UPDATE"
+    val interests: List<String>,
+    override var eventType: String = "PROFILE_CREATE"
 ) : Event() {}

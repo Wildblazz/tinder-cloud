@@ -1,6 +1,6 @@
 package io.github.wildblazz.profile_service.model.dto
 
-import io.github.wildblazz.profile_service.model.Gender
+import io.github.wildblazz.shared.model.Gender
 import java.time.LocalDate
 
 data class ProfileDto(

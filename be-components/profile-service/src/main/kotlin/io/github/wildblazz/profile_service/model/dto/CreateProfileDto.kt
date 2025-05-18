@@ -1,7 +1,7 @@
 package io.github.wildblazz.profile_service.model.dto
 
 import io.github.wildblazz.profile_service.model.Coordinates
-import io.github.wildblazz.profile_service.model.Gender
+import io.github.wildblazz.shared.model.Gender
 import jakarta.validation.Valid
 import jakarta.validation.constraints.*
 import java.time.LocalDate

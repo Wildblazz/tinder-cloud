@@ -1,6 +1,6 @@
 package io.github.wildblazz.profile_service.model
 
-
+import io.github.wildblazz.shared.model.Gender
 import jakarta.persistence.*
 import java.time.LocalDate
 import java.time.LocalDateTime

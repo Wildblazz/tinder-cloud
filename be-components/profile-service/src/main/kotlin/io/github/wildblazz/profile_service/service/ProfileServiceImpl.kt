@@ -23,7 +23,8 @@ import java.time.Period
 class ProfileServiceImpl(
     private val profileRepository: ProfileRepository,
     private val keycloakService: KeycloakService,
-    private val eventService: EventService
+    private val eventService: EventService,
+    private val geocodingService: GeocodingService
 ) : ProfileService {
 
     override fun getProfileByKeycloakId(keycloakId: String): ProfileDto {
@@ -57,6 +58,7 @@ class ProfileServiceImpl(
             )
         }
 
+        resolveCoordinates(profile);
         val savedProfile = profileRepository.save(profile)
 
         eventService.publish(
@@ -66,6 +68,7 @@ class ProfileServiceImpl(
                     userName = userName,
                     firstName = firstName,
                     lastName = lastName,
+                    gender = gender,
                     city = city,
                     latitude = coordinates?.latitude,
                     longitude = coordinates?.longitude,
@@ -80,6 +83,7 @@ class ProfileServiceImpl(
     override fun updateProfile(keycloakId: String, profileDto: UpdateProfileDto): ProfileDto {
         val existingProfile = getUserProfile(keycloakId)
         profileDto.email?.let { isProfileExistsByEmail(it) }
+        var cityChanged = false
 
         existingProfile.apply {
             firstName = profileDto.firstName?.takeIf { it.isNotBlank() } ?: firstName
@@ -87,10 +91,16 @@ class ProfileServiceImpl(
             email = profileDto.email?.takeIf { it.isNotBlank() } ?: email
             searchRadiusKm = profileDto.searchRadiusKm.takeIf { true } ?: searchRadiusKm
             coordinates = profileDto.coordinates?.takeIf { true } ?: coordinates
-            city = profileDto.city?.takeIf { it.isNotBlank() } ?: city
+            city = profileDto.city?.takeIf { it.isNotBlank() }?.let { newCity ->
+                if (newCity != city) {
+                    cityChanged = true
+                }
+                newCity
+            } ?: city
             bio = profileDto.bio?.takeIf { it.isNotBlank() } ?: bio
             interests = profileDto.interests?.takeIf { it.isNotEmpty() } ?: interests
         }
+        cityChanged.takeIf { it }?.let { resolveCoordinates(existingProfile) }
 
         keycloakService.updateUser(
             keycloakId,
@@ -166,6 +176,14 @@ class ProfileServiceImpl(
         return profileRepository.findByKeycloakId(keycloakId)
             ?: throw NotFoundException(EXCEPTION_PROFILE_NOT_FOUND, arrayOf(keycloakId))
     }
+
+    private fun resolveCoordinates(profile: Profile) {
+        if (profile.coordinates != null) {
+            val coordinates = geocodingService.resolveCityCoordinates(profile.city)
+            profile.coordinates = coordinates
+        }
+    }
+
 
     private fun mapToDto(profile: Profile): ProfileDto {
         return ProfileDto(

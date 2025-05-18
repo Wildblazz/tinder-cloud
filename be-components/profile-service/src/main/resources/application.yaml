@@ -27,3 +27,7 @@ springdoc:
     title: Tinder Cloud - Profile Service
     description: REST API for managing user profiles in Tinder Cloud platform
     version: 1.0.0
+
+openstreetmap:
+  search-url: https://nominatim.openstreetmap.org/search
+  app-name: TinderCloud

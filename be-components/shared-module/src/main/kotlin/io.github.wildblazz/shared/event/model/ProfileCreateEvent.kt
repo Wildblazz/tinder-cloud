@@ -8,8 +8,10 @@ class ProfileCreateEvent(
     val firstName: String,
     val lastName: String,
     val gender: Gender,
-    val latitude: Double?,
-    val longitude: Double?,
+    val latitude: Double,
+    val longitude: Double,
     val city: String,
-    override var eventType: String = "PROFILE_UPDATE"
+    val searchRadiusKm: Int?,
+    var interests: List<String>,
+    override var eventType: String = "PROFILE_CREATE"
 ) : Event() {}

@@ -3,7 +3,6 @@ package io.github.wildblazz.reaction_service.entity
 import io.github.wildblazz.reaction_service.model.ReactionType
 import jakarta.persistence.*
 import java.time.LocalDateTime
-import java.util.*
 
 @Entity
 @Table(

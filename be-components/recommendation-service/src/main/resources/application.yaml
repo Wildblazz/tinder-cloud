@@ -12,3 +12,7 @@ springdoc:
     title: Tinder Cloud - Recommendation Service
     description: Service for preparing recommendations to the users in Tinder Cloud platform
     version: 1.0.0
+
+recommendation:
+  batch-generate:
+    cron: "0 0 * * * *" # every hour

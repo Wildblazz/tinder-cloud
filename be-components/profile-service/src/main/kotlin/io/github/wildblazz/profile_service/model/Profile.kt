@@ -43,7 +43,7 @@ data class Profile(
     var searchRadiusKm: Int = 30,
 
     @Embedded
-    var coordinates: Coordinates?,
+    var coordinates: Coordinates,
 
     @Column(nullable = false)
     var city: String,

@@ -5,9 +5,9 @@ class ProfileUpdateEvent(
     val firstName: String,
     val lastName: String,
     val searchRadiusKm: Int,
-    val latitude: Double?,
-    val longitude: Double?,
+    val latitude: Double,
+    val longitude: Double,
     val city: String,
     val interests: List<String>,
-    override var eventType: String = "PROFILE_CREATE"
+    override var eventType: String = "PROFILE_UPDATE"
 ) : Event() {}

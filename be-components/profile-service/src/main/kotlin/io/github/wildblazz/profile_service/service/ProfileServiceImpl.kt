@@ -2,6 +2,7 @@ package io.github.wildblazz.profile_service.service
 
 import io.github.wildblazz.profile_service.common.Constants
 import io.github.wildblazz.profile_service.common.Constants.EXCEPTION_PROFILE_NOT_FOUND
+import io.github.wildblazz.profile_service.model.Coordinates
 import io.github.wildblazz.profile_service.model.Profile
 import io.github.wildblazz.profile_service.model.dto.*
 import io.github.wildblazz.profile_service.repository.ProfileRepository
@@ -47,7 +48,7 @@ class ProfileServiceImpl(
                 userName = userName,
                 firstName = firstName,
                 lastName = lastName,
-                coordinates = coordinates,
+                coordinates = resolveCoordinates(coordinates, city),
                 city = city,
                 gender = gender,
                 bio = bio,
@@ -58,20 +59,21 @@ class ProfileServiceImpl(
             )
         }
 
-        resolveCoordinates(profile);
         val savedProfile = profileRepository.save(profile)
 
         eventService.publish(
             profileDto.run {
                 ProfileCreateEvent(
                     keycloakId = profile.keycloakId,
-                    userName = userName,
-                    firstName = firstName,
-                    lastName = lastName,
-                    gender = gender,
-                    city = city,
-                    latitude = coordinates?.latitude,
-                    longitude = coordinates?.longitude,
+                    userName = profile.userName,
+                    firstName = profile.firstName,
+                    lastName = profile.lastName,
+                    gender = profile.gender,
+                    city = profile.city,
+                    latitude = profile.coordinates.latitude,
+                    longitude = profile.coordinates.longitude,
+                    searchRadiusKm = profile.searchRadiusKm,
+                    interests = profile.interests,
                 )
             }
         )
@@ -100,7 +102,9 @@ class ProfileServiceImpl(
             bio = profileDto.bio?.takeIf { it.isNotBlank() } ?: bio
             interests = profileDto.interests?.takeIf { it.isNotEmpty() } ?: interests
         }
-        cityChanged.takeIf { it }?.let { resolveCoordinates(existingProfile) }
+        if (cityChanged && profileDto.coordinates == null) {
+            existingProfile.coordinates = geocodingService.resolveCityCoordinates(existingProfile.city)
+        }
 
         keycloakService.updateUser(
             keycloakId,
@@ -120,8 +124,8 @@ class ProfileServiceImpl(
                     searchRadiusKm = searchRadiusKm,
                     interests = interests,
                     city = city,
-                    latitude = coordinates?.latitude,
-                    longitude = coordinates?.longitude,
+                    latitude = coordinates.latitude,
+                    longitude = coordinates.longitude,
                 )
             }
         )
@@ -146,7 +150,6 @@ class ProfileServiceImpl(
 
             criteria.age?.let { predicates.add(cb.equal(root.get<Int>("age"), it)) }
             criteria.gender?.let { predicates.add(cb.equal(root.get<String>("gender"), it)) }
-//            todo - transfer to recommendation service?
             criteria.location?.let { predicates.add(cb.like(cb.lower(root.get("location")), "%${it.lowercase()}%")) }
             criteria.bio?.let { predicates.add(cb.like(cb.lower(root.get("bio")), "%${it.lowercase()}%")) }
             criteria.interests?.let { interests ->
@@ -177,12 +180,8 @@ class ProfileServiceImpl(
             ?: throw NotFoundException(EXCEPTION_PROFILE_NOT_FOUND, arrayOf(keycloakId))
     }
 
-    private fun resolveCoordinates(profile: Profile) {
-        if (profile.coordinates != null) {
-            val coordinates = geocodingService.resolveCityCoordinates(profile.city)
-            profile.coordinates = coordinates
-        }
-    }
+    private fun resolveCoordinates(coordinates: Coordinates?, city: String): Coordinates =
+        coordinates ?: geocodingService.resolveCityCoordinates(city)
 
 
     private fun mapToDto(profile: Profile): ProfileDto {

@@ -4,6 +4,9 @@ import io.github.wildblazz.reaction_service.common.Constants
 import io.github.wildblazz.reaction_service.entity.Reaction
 import io.github.wildblazz.reaction_service.model.dto.CreateRequest
 import io.github.wildblazz.reaction_service.repository.ReactionRepository
+import io.github.wildblazz.shared.event.model.LikeCreateEvent
+import io.github.wildblazz.shared.event.model.LikeDeleteEvent
+import io.github.wildblazz.shared.event.service.EventService
 import io.github.wildblazz.shared.exception.types.NotFoundException
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -13,7 +16,8 @@ import java.time.LocalDateTime
 
 @Service
 class ReactionService(
-    private val reactionRepository: ReactionRepository
+    private val reactionRepository: ReactionRepository,
+    private val eventService: EventService
 ) {
     @Transactional
     fun createReaction(userId: String, request: CreateRequest): Reaction {
@@ -31,6 +35,8 @@ class ReactionService(
             isSuper = request.isSuper
         )
 
+        eventService.publish(LikeCreateEvent(userId, request.targetUserId))
+
         return reactionRepository.save(reaction)
     }
 
@@ -46,6 +52,8 @@ class ReactionService(
     fun deleteReaction(userId: String, id: Long) {
         val reaction = getReactionById(userId, id)
         reactionRepository.delete(reaction)
+
+        eventService.publish(LikeDeleteEvent(userId, reaction.targetUserId))
     }
 
     private fun getReactionById(userId: String, id: Long): Reaction {

@@ -1,6 +1,6 @@
 package io.github.wildblazz.reaction_service.entity
 
-import io.github.wildblazz.reaction_service.model.ReactionType
+import io.github.wildblazz.reaction_service.model.dto.ReactionType
 import jakarta.persistence.*
 import java.time.LocalDateTime
 

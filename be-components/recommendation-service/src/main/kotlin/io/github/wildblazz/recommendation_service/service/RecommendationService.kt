@@ -37,7 +37,6 @@ class RecommendationService(
     fun generateRecommendationsForUser(user: RecommendationProfile): Recommendation {
         var allRecommendations = recommendationRepository.findByUserId(user.keycloakId)
 
-        // return relevant recommendation if exists
         allRecommendations.firstOrNull {
             !it.viewed && it.generatedAt.isAfter(Instant.now().minus(Duration.ofDays(1)))
         }?.let { return it }

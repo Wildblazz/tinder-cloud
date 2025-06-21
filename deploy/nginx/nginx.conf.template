@@ -17,5 +17,13 @@ http {
         location /api/reactions {
             proxy_pass http://${REACTIONS_HOST}:${REACTIONS_PORT}$request_uri;
         }
+
+        location /api/recommendations {
+             proxy_pass http://${RECOMMENDATIONS_HOST}:${RECOMMENDATIONS_PORT}$request_uri;
+        }
+
+        location /api/matches {
+             proxy_pass http://${MATCHES_HOST}:${MATCHES_PORT}$request_uri;
+        }
     }
 }

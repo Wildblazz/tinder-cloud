@@ -12,6 +12,7 @@ import io.github.wildblazz.shared.event.model.ProfileUpdateEvent
 import io.github.wildblazz.shared.event.service.EventService
 import io.github.wildblazz.shared.exception.types.DuplicateException
 import io.github.wildblazz.shared.exception.types.NotFoundException
+import io.github.wildblazz.shared.model.Gender
 import jakarta.persistence.criteria.Predicate
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
@@ -148,13 +149,20 @@ class ProfileServiceImpl(
         val profiles = profileRepository.findAll({ root, query, cb ->
             val predicates = mutableListOf<Predicate>()
 
-            criteria.age?.let { predicates.add(cb.equal(root.get<Int>("age"), it)) }
-            criteria.gender?.let { predicates.add(cb.equal(root.get<String>("gender"), it)) }
-            criteria.location?.let { predicates.add(cb.like(cb.lower(root.get("location")), "%${it.lowercase()}%")) }
-            criteria.bio?.let { predicates.add(cb.like(cb.lower(root.get("bio")), "%${it.lowercase()}%")) }
+            criteria.age?.let { age ->
+                val today = LocalDate.now()
+                val fromDate = today.minusYears((age + 1).toLong()).plusDays(1)
+                val toDate = today.minusYears(age.toLong())
+                predicates.add(cb.between(root.get<LocalDate>("birthDate"), fromDate, toDate))
+            }
+            criteria.location?.let { predicates.add(cb.equal(cb.lower(root.get("location")), "%${it.lowercase()}%")) }
+            criteria.gender?.let {
+                val genderEnum = Gender.valueOf(it.uppercase())
+                predicates.add(cb.equal(root.get<Gender>("gender"), genderEnum))
+            }
             criteria.interests?.let { interests ->
                 val interestPredicates = interests.map { interest ->
-                    cb.isMember(interest.lowercase(), root.get<Set<String>>("interests"))
+                    cb.isMember(interest, root.get<Set<String>>("interests"))
                 }
                 predicates.add(cb.or(*interestPredicates.toTypedArray()))
             }

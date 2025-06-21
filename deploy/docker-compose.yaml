@@ -64,6 +64,10 @@ services:
       - PROFILES_PORT=${PROFILES_PORT}
       - REACTIONS_HOST=${REACTIONS_HOST}
       - REACTIONS_PORT=${REACTIONS_PORT}
+      - RECOMMENDATIONS_HOST=${RECOMMENDATIONS_HOST}
+      - RECOMMENDATIONS_PORT=${RECOMMENDATIONS_PORT}
+      - MATCHES_HOST=${MATCHES_HOST}
+      - MATCHES_PORT=${MATCHES_PORT}
     entrypoint: >
       sh -c "envsubst < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf && exec nginx -g 'daemon off;'"
     networks:
@@ -92,10 +96,26 @@ services:
     networks:
       - tinder_network
 
+  mongodb:
+    image: mongo:8
+    container_name: mongodb
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGODB_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGODB_PASSWORD}
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    networks:
+      - tinder_network
+
 volumes:
   postgres_data:
     driver: local
   minio_data:
+    driver: local
+  mongodb_data:
     driver: local
 
 networks:

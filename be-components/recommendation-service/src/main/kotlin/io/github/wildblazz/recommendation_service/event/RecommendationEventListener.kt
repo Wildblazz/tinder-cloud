@@ -7,6 +7,7 @@ import io.github.wildblazz.shared.event.model.ProfileDeleteEvent
 import io.github.wildblazz.shared.event.model.ProfileUpdateEvent
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.data.geo.Point
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.stereotype.Service
 import java.time.Instant
@@ -27,9 +28,8 @@ class RecommendationEventListener(private val recommendationService: Recommendat
                     userName = userName,
                     firstName = firstName,
                     lastName = lastName,
+                    location = Point(longitude, latitude),
                     city = city,
-                    latitude = latitude,
-                    longitude = longitude,
                     searchRadiusKm = searchRadiusKm ?: 30,
                     gender = gender,
                     interests = interests,

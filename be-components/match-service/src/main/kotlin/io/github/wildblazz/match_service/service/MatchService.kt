@@ -18,16 +18,14 @@ class MatchService(private val matchRepository: MatchRepository) {
         val existingEntity = matchRepository.findByUser1AndUser2(fromUser, toUser)
         if (existingEntity.isPresent) {
             val existingMatch = existingEntity.get()
-            if (fromUser != existingMatch.user1) {
-                val now = Instant.now()
-                existingMatch.matchedAt = now
-                existingMatch.lastActivity = now
-                existingMatch.status = MatchStatus.MATCHED
-                matchRepository.save(existingMatch)
-                logger.info("Updated match ${existingMatch.user1} for ${existingMatch.user2}")
-                // send notification event
-                return;
-            }
+            val now = Instant.now()
+            existingMatch.matchedAt = now
+            existingMatch.lastActivity = now
+            existingMatch.status = MatchStatus.MATCHED
+            matchRepository.save(existingMatch)
+            logger.info("Updated match ${existingMatch.user1} for ${existingMatch.user2}")
+            // send notification event
+
             return;
         }
         val match = Match(

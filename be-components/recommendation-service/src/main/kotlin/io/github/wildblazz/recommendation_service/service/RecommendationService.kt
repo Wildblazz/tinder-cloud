@@ -54,10 +54,8 @@ class RecommendationService(
             .flatMap { it.recommendedUserIds }
             .toSet()
 
-        val coordinates = Point(user.longitude, user.latitude)
-
         val geoCriteria = Criteria.where("location")
-            .nearSphere(coordinates)
+            .nearSphere(user.location)
             .maxDistance(kmToRadians(user.searchRadiusKm))
 
         val interestCriteria = Criteria.where("interests").`in`(user.interests)
@@ -100,8 +98,8 @@ class RecommendationService(
         val profile = profileRepository.findById(event.keycloakId).orElse(null)
         profile?.let {
             if (it.interests != event.interests ||
-                it.latitude != event.latitude ||
-                it.longitude != event.longitude ||
+                it.location.x != event.longitude ||
+                it.location.y != event.latitude ||
                 it.searchRadiusKm != event.searchRadiusKm
             ) {
                 regenerationRequire = true
@@ -111,8 +109,7 @@ class RecommendationService(
             it.searchRadiusKm = event.searchRadiusKm
             it.interests = event.interests
             it.city = event.city
-            it.latitude = event.latitude
-            it.longitude = event.longitude
+            it.location = Point(event.longitude, event.latitude)
             it.lastUpdatedAt = Instant.now()
             profileRepository.save(it)
             if (regenerationRequire) {

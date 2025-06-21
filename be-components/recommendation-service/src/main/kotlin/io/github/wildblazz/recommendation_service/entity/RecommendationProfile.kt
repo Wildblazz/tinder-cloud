@@ -1,7 +1,10 @@
 package io.github.wildblazz.recommendation_service.entity
 
 import io.github.wildblazz.shared.model.Gender
-import jakarta.persistence.Id
+import org.springframework.data.annotation.Id
+import org.springframework.data.geo.Point
+import org.springframework.data.mongodb.core.index.GeoSpatialIndexType
+import org.springframework.data.mongodb.core.index.GeoSpatialIndexed
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.Instant
 
@@ -12,8 +15,8 @@ data class RecommendationProfile(
     val userName: String,
     var firstName: String,
     var lastName: String,
-    var latitude: Double,
-    var longitude: Double,
+    @GeoSpatialIndexed(type = GeoSpatialIndexType.GEO_2DSPHERE)
+    var location: Point,
     var city: String,
     var searchRadiusKm: Int = 30,
     val gender: Gender,

@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @Validated
 @RestController
-@RequestMapping("/api/recommendation")
+@RequestMapping("/api/recommendations")
 class RecommendationController(private val recommendationService: RecommendationService) {
 
     @GetMapping("/{userId}")

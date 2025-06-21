@@ -1,3 +1,6 @@
+server:
+  port: 8085
+
 spring:
   application:
     name: recommendation-service
@@ -6,6 +9,10 @@ spring:
   kafka:
     consumer:
       group-id: recommendation-service
+  data:
+    mongodb:
+      uri: mongodb://${MONGODB_USERNAME}:${MONGODB_PASSWORD}@${MONGO_HOST:localhost}:${MONGO_PORT:27017}/${MONGO_DB_NAME:recommendation}?authSource=admin
+      auto-index-creation: true
 
 springdoc:
   info:

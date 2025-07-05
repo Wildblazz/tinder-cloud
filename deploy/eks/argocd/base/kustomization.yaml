@@ -1,0 +1,3 @@
+resources:
+  - ../local-registry/deployment.yaml
+  - ../local-registry/service.yaml

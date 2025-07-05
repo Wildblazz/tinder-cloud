@@ -1,0 +1,27 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: tinder-cloud
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  # The project the application belongs to.
+  project: tinder-cloud
+
+  source:
+    repoURL: https://github.com/Wildblazz/tinder-cloud/deploy/eks/argocd/base.git
+    targetRevision: HEAD
+    path: deploy/argocd  # TODO
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: tinder-space
+
+  # Sync policy
+  syncPolicy:
+    automated:
+      prune: true # Specifies if resources should be pruned during auto-syncing
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

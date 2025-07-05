@@ -28,7 +28,7 @@ spring:
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
     admin:
       properties:
-        bootstrap.servers: {KAFKA_HOST:localhost:9093}
+        bootstrap.servers: ${KAFKA_HOST:localhost:9093}
     consumer:
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer

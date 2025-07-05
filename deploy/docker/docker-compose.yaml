@@ -11,7 +11,7 @@ services:
     ports:
       - "5432:5432"
     networks:
-      - tinder_network
+      - tinder-network
 
   keycloak:
     image: quay.io/keycloak/keycloak:26.2.0
@@ -32,7 +32,7 @@ services:
     volumes:
       - ./keycloak-import:/opt/keycloak/data/import
     networks:
-      - tinder_network
+      - tinder-network
 
   minio:
     image: minio/minio:latest
@@ -47,7 +47,7 @@ services:
     volumes:
       - minio_data:/data
     networks:
-      - tinder_network
+      - tinder-network
 
   nginx:
     image: nginx:latest
@@ -71,7 +71,7 @@ services:
     entrypoint: >
       sh -c "envsubst < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf && exec nginx -g 'daemon off;'"
     networks:
-      - tinder_network
+      - tinder-network
 
   zookeeper:
     image: wurstmeister/zookeeper
@@ -79,7 +79,7 @@ services:
     ports:
       - "2181:2181"
     networks:
-      - tinder_network
+      - tinder-network
   kafka:
     image: wurstmeister/kafka
     container_name: kafka
@@ -94,7 +94,7 @@ services:
     depends_on:
       - zookeeper
     networks:
-      - tinder_network
+      - tinder-network
 
   mongodb:
     image: mongo:8
@@ -108,7 +108,7 @@ services:
       - mongodb_data:/data/db
       - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
     networks:
-      - tinder_network
+      - tinder-network
 
 volumes:
   postgres_data:
@@ -119,5 +119,6 @@ volumes:
     driver: local
 
 networks:
-  tinder_network:
+  tinder-network:
     driver: bridge
+    attachable: true

@@ -49,6 +49,21 @@ The system will implement these key dating platform capabilities:
 * Create `.env` file in the 'deploy' directory. Use `.env-example` as a reference
 * From directory 'deploy' run command: `docker compose --env-file .env up` to start DBs, KeyCloak, Kafka, etc
 
+### Creating docker images
+* From folder /be-components run `docker build -f ${SERVICE_NAME}/Dockerfile -t match-service:v1 .` (change ${SERVICE_NAME} to real service name)
+* Check Dockerfiles of each service, what env variables are expected 
+* runwith expected env variables `docker run -e MONGODB_USERNAME=admin -e MONGODB_PASSWORD=password -p 8084:8084 your-image-name`
+
+### Kubernetes deployment
+* run minikube: `deploy/minikube-init.sh`
+* Optionally open minikube UI: `minikube dashboard`
+* Run ArgoCD: `deploy/argocd-init.sh`
+* Install kustomize `brew install kustomize`
+* to make ArgoCd UI accessible - `kubectl port-forward svc/argocd-server -n argocd 8080:443`
+* Open Ui https://localhost:8080
+* Login: admin. Get password: `kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d` -> string without % is password
+
+
 Shield: [![CC BY-NC 4.0][cc-by-nc-shield]][cc-by-nc]
 
 This work is licensed under a

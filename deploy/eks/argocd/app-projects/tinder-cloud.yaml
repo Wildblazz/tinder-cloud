@@ -8,7 +8,9 @@ spec:
   sourceRepos:
     - 'https://github.com/Wildblazz/tinder-cloud.git'
   destinations:
-    - namespace: 'tinder-space'
+    - namespace: tinder-space
+      server: https://kubernetes.default.svc
+    - namespace: kube-system
       server: https://kubernetes.default.svc
   clusterResourceWhitelist:
     - group: '*'

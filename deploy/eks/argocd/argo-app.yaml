@@ -6,7 +6,6 @@ metadata:
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
-  # The project the application belongs to.
   project: tinder-cloud
 
   source:
@@ -18,10 +17,9 @@ spec:
     server: https://kubernetes.default.svc
     namespace: tinder-space
 
-  # Sync policy
   syncPolicy:
     automated:
-      prune: true # Specifies if resources should be pruned during auto-syncing
+      prune: true
       selfHeal: true
     syncOptions:
       - CreateNamespace=true

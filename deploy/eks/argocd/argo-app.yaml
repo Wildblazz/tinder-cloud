@@ -10,9 +10,9 @@ spec:
   project: tinder-cloud
 
   source:
-    repoURL: https://github.com/Wildblazz/tinder-cloud/deploy/eks/argocd/base.git
+    repoURL: https://github.com/Wildblazz/tinder-cloud/.git
     targetRevision: HEAD
-    path: deploy/argocd  # TODO
+    path: deploy/eks/argocd/base
 
   destination:
     server: https://kubernetes.default.svc

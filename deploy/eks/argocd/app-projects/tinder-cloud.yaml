@@ -1,0 +1,15 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: tinder-cloud
+  namespace: argocd
+spec:
+  description: Tinder microservices project
+  sourceRepos:
+    - 'https://github.com/Wildblazz/tinder-cloud.git'
+  destinations:
+    - namespace: 'tinder-space'
+      server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+    - group: '*'
+      kind: '*'

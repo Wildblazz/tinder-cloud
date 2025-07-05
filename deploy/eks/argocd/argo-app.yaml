@@ -10,7 +10,7 @@ spec:
   project: tinder-cloud
 
   source:
-    repoURL: https://github.com/Wildblazz/tinder-cloud/.git
+    repoURL: https://github.com/Wildblazz/tinder-cloud.git
     targetRevision: HEAD
     path: deploy/eks/argocd/base
 

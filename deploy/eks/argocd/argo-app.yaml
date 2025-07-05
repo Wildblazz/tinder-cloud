@@ -15,8 +15,10 @@ spec:
     path: deploy/eks/argocd/base
 
   destination:
-    server: https://kubernetes.default.svc
-    namespace: tinder-space
+    - namespace: tinder-space
+      server: https://kubernetes.default.svc
+    - namespace: kube-system
+      server: https://kubernetes.default.svc
 
   # Sync policy
   syncPolicy:

@@ -61,6 +61,8 @@ The system will implement these key dating platform capabilities:
 * Install kustomize `brew install kustomize`
 * to make ArgoCd UI accessible - `kubectl port-forward svc/argocd-server -n argocd 8080:443`
 * Open Ui https://localhost:8080
+* Create ArgoCD app `kubectl apply -f deploy/eks/argocd/app-projects/tinder-cloud.yaml`
+* Deploy app in cluster `kubectl apply -f deploy/eks/argocd/argo-app.yaml`
 * Login: admin. Get password: `kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d` -> string without % is password
 
 

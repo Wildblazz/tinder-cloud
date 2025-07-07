@@ -11,7 +11,7 @@ spec:
   source:
     repoURL: https://github.com/Wildblazz/tinder-cloud.git
     targetRevision: HEAD
-    path: deploy/eks/argocd/base
+    path: deploy/eks/argocd/base/tinder-app
 
   destination:
     server: https://kubernetes.default.svc

@@ -55,14 +55,16 @@ The system will implement these key dating platform capabilities:
 * runwith expected env variables `docker run -e MONGODB_USERNAME=admin -e MONGODB_PASSWORD=password -p 8084:8084 your-image-name`
 
 ### Kubernetes deployment
-* run minikube: `deploy/minikube-init.sh`
+* run minikube: `chmod +x deploy/eks/minikube-init.sh` -> `./deploy/eks/minikube-init.sh`
 * Optionally open minikube UI: `minikube dashboard`
-* Run ArgoCD: `deploy/argocd-init.sh`
+* Run ArgoCD: `chmod +x deploy/eks/argocd-init.sh` -> `./deploy/eks/argocd-init.sh`
 * Install kustomize `brew install kustomize`
 * to make ArgoCd UI accessible - `kubectl port-forward svc/argocd-server -n argocd 8080:443`
 * Open Ui https://localhost:8080
-* Create ArgoCD app `kubectl apply -f deploy/eks/argocd/app-projects/tinder-cloud.yaml`
-* Deploy app in cluster `kubectl apply -f deploy/eks/argocd/argo-app.yaml`
+* Create ArgoCD apps `kubectl apply -f deploy/eks/argocd/app-projects/infrastructure.yaml` 
+* `kubectl apply -f deploy/eks/argocd/app-projects/tinder-cloud.yaml`
+* Deploy apps in cluster `kubectl apply -f deploy/eks/argocd/apps/infrastructure-app.yaml`
+* Deploy apps in cluster `kubectl apply -f deploy/eks/argocd/apps/tinder-app.yaml`
 * Login: admin. Get password: `kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d` -> string without % is password
 
 

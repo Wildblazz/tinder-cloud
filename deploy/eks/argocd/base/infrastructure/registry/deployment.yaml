@@ -1,8 +1,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+#  local docker registry
   name: registry
-  namespace: kube-system
+  namespace: infrastructure
 spec:
   replicas: 1
   selector:

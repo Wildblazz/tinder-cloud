@@ -55,9 +55,9 @@ The system will implement these key dating platform capabilities:
 * runwith expected env variables `docker run -e MONGODB_USERNAME=admin -e MONGODB_PASSWORD=password -p 8084:8084 your-image-name`
 
 ### Kubernetes deployment
-* run minikube: `deploy/minikube-init.sh`
+* run minikube: `chmod +x deploy/eks/minikube-init.sh` -> `./deploy/eks/minikube-init.sh`
 * Optionally open minikube UI: `minikube dashboard`
-* Run ArgoCD: `deploy/argocd-init.sh`
+* Run ArgoCD: `chmod +x deploy/eks/argocd-init.sh` -> `./deploy/eks/argocd-init.sh`
 * Install kustomize `brew install kustomize`
 * to make ArgoCd UI accessible - `kubectl port-forward svc/argocd-server -n argocd 8080:443`
 * Open Ui https://localhost:8080

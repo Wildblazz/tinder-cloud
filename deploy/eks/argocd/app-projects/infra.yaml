@@ -1,10 +1,10 @@
 apiVersion: argoproj.io/v1alpha1
 kind: AppProject
 metadata:
-  name: tinder-cloud
+  name: infra
   namespace: argocd
 spec:
-  description: Tinder microservices project
+  description: Shared infra components
   sourceRepos:
     - 'https://github.com/Wildblazz/tinder-cloud.git'
   destinations:

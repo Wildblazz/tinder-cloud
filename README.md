@@ -46,26 +46,37 @@ The system will implement these key dating platform capabilities:
 - [Link to architecture documentation](docs/architecture/high-level.md)
 
 ### Local start
-* Create `.env` file in the 'deploy' directory. Use `.env-example` as a reference
-* From directory 'deploy' run command: `docker compose --env-file .env up` to start DBs, KeyCloak, Kafka, etc
+* Create `.env` file in the 'deploy/docker' directory. Use `.env-example` as a reference
+* From directory 'deploy/docker' run command: `docker compose --env-file .env up` to start DBs, KeyCloak, Kafka, etc
 
 ### Creating docker images
 * From folder /be-components run `docker build -f ${SERVICE_NAME}/Dockerfile -t match-service:v1 .` (change ${SERVICE_NAME} to real service name)
 * Check Dockerfiles of each service, what env variables are expected 
-* runwith expected env variables `docker run -e MONGODB_USERNAME=admin -e MONGODB_PASSWORD=password -p 8084:8084 your-image-name`
+* Run with expected env variables. Example: `docker run -e MONGODB_USERNAME=admin -e MONGODB_PASSWORD=password -p 8084:8084 your-image-name`
 
 ### Kubernetes deployment
-* run minikube: `chmod +x deploy/eks/minikube-init.sh` -> `./deploy/eks/minikube-init.sh`
-* Optionally open minikube UI: `minikube dashboard`
-* Run ArgoCD: `chmod +x deploy/eks/argocd-init.sh` -> `./deploy/eks/argocd-init.sh`
-* Install kustomize `brew install kustomize`
-* to make ArgoCd UI accessible - `kubectl port-forward svc/argocd-server -n argocd 8080:443`
-* Open Ui https://localhost:8080
-* Create ArgoCD apps `kubectl apply -f deploy/eks/argocd/app-projects/infrastructure.yaml` 
-* `kubectl apply -f deploy/eks/argocd/app-projects/tinder-cloud.yaml`
-* Deploy apps in cluster `kubectl apply -f deploy/eks/argocd/apps/infrastructure-app.yaml`
-* Deploy apps in cluster `kubectl apply -f deploy/eks/argocd/apps/tinder-app.yaml`
-* Login: admin. Get password: `kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d` -> string without % is password
+* Run minikube:
+  * `chmod +x deploy/eks/minikube-init.sh`
+  * `./deploy/eks/minikube-init.sh`
+  * Optionally open minikube UI: `minikube dashboard`
+* Run ArgoCD:
+  * `chmod +x deploy/eks/argocd-init.sh` 
+  * `./deploy/eks/argocd-init.sh`
+* Install kustomize: `brew install kustomize`
+  * To make ArgoCd UI accessible - `kubectl port-forward svc/argocd-server -n argocd 8080:443`
+  * ArgoCd UI: `https://localhost:8080`
+  * Login: admin. Get password: `kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d` -> string without % is password
+* Create ArgoCD apps:
+  * `kubectl apply -f deploy/eks/argocd/app-projects/infrastructure.yaml` 
+  * `kubectl apply -f deploy/eks/argocd/app-projects/tinder-cloud.yaml`
+* Deploy generate secrets and add into cluster:
+  * In deploy `/eks/argocd/secrets/` create a file `.env.secrets` Example file: `.env.secrets.example`
+  * `chmod +x deploy/eks/argocd/secrets/apply-secret.sh`
+  * `./deploy/eks/argocd/secrets/apply-secret.sh`
+* Deploy infra apps in cluster:
+  * `kubectl apply -f deploy/eks/argocd/apps/infrastructure-app.yaml`
+  * `kubectl apply -f deploy/eks/argocd/apps/tinder-app.yaml`
+
 
 
 Shield: [![CC BY-NC 4.0][cc-by-nc-shield]][cc-by-nc]

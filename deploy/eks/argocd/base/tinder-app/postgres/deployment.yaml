@@ -1,26 +1,43 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: profile-service
+  name: postgres
+  namespace: tinder-space
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
-      app: profile-service
+      app: postgres
   template:
     metadata:
       labels:
-        app: profile-service
+        app: postgres
     spec:
       containers:
-        - name: profile-service
-          image: your-registry/profile-service:latest
+        - name: postgres
+          image: postgres:17
           ports:
-            - containerPort: 8080
+            - containerPort: 5432
           env:
-            - name: SPRING_DATASOURCE_URL
-              value: jdbc:postgresql://postgres:5432/appdb
-            - name: SPRING_DATASOURCE_USERNAME
-              value: appuser
-            - name: SPRING_DATASOURCE_PASSWORD
-              value: apppass
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: tinder-secrets
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: tinder-secrets
+                  key: POSTGRES_PASSWORD
+          volumeMounts:
+            - name: postgres-data
+              mountPath: /var/lib/postgresql/data
+            - name: init-scripts
+              mountPath: /docker-entrypoint-initdb.d
+      volumes:
+        - name: postgres-data
+          persistentVolumeClaim:
+            claimName: postgres-pvc
+        - name: init-scripts
+          configMap:
+            name: postgres-init-script

@@ -1,0 +1,6 @@
+bases:
+  - ../../base
+images:
+  - name: localhost:5000/reaction-service
+    newName: dockerhubuser/reaction-service #TODO add dockerhub user(or artifactory)
+    newTag: latest

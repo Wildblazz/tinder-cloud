@@ -28,3 +28,6 @@ replay_pid*
 */build/
 */.kotlin/
 /fe-components/
+/deploy/eks/argocd/secrets/.env.secrets
+/deploy/docker/.env
+/deploy/eks/argocd/secrets/secret.yaml.generated

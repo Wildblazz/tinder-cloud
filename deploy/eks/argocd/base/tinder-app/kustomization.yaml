@@ -1,1 +1,5 @@
-#resources:
+resources:
+  - postgres/configmap.yaml
+  - postgres/volume.yaml
+  - postgres/secret.yaml
+  - postgres/deployment.yaml

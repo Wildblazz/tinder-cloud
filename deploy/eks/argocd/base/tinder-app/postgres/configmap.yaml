@@ -1,0 +1,11 @@
+apiVersion: v1
+data:
+  init.sql: |
+    CREATE DATABASE keycloak;
+    CREATE DATABASE profiles;
+    CREATE DATABASE reactions;
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: postgres-init-script
+  namespace: tinder-space

@@ -69,7 +69,7 @@ The system will implement these key dating platform capabilities:
 * Create ArgoCD apps:
   * `kubectl apply -f deploy/eks/argocd/app-projects/infrastructure.yaml` 
   * `kubectl apply -f deploy/eks/argocd/app-projects/tinder-cloud.yaml`
-* Deploy generate secrets and add into cluster:
+* Generate secrets and add into cluster:
   * In deploy `/eks/argocd/secrets/` create a file `.env.secrets` Example file: `.env.secrets.example`
   * `chmod +x deploy/eks/argocd/secrets/apply-secret.sh`
   * `./deploy/eks/argocd/secrets/apply-secret.sh`

@@ -1,10 +1,8 @@
 resources:
   - postgres/configmap.yaml
   - postgres/volume.yaml
-  - postgres/secret.yaml
   - postgres/deployment.yaml
   - keycloak/configmap.yaml
   - keycloak/configmap-realm.yaml
-  - keycloak/secret.yaml
   - keycloak/deployment.yaml
   - keycloak/service.yaml

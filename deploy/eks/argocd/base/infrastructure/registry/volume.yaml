@@ -2,7 +2,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: registry-storage
-  namespace: tinder-space
+  namespace: infrastructure
 spec:
   accessModes:
     - ReadWriteOnce

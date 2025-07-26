@@ -1,0 +1,30 @@
+# ClusterIP service for port 9000
+apiVersion: v1
+kind: Service
+metadata:
+  name: minio-clusterip
+  namespace: tinder-space
+spec:
+  selector:
+    app: minio
+  ports:
+    - port: 9000
+      targetPort: 9000
+      protocol: TCP
+  type: ClusterIP
+---
+# NodePort service for minio UI
+apiVersion: v1
+kind: Service
+metadata:
+  name: minio-nodeport
+  namespace: tinder-space
+spec:
+  selector:
+    app: minio
+  ports:
+    - port: 9001
+      targetPort: 9001
+      protocol: TCP
+      nodePort: 30901
+  type: NodePort

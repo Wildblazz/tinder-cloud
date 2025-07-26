@@ -6,3 +6,5 @@ resources:
   - keycloak/configmap-realm.yaml
   - keycloak/deployment.yaml
   - keycloak/service.yaml
+  - minio/service.yaml
+  - minio/service.yaml

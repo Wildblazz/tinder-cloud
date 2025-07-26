@@ -75,7 +75,10 @@ The system will implement these key dating platform capabilities:
   * `./deploy/eks/argocd/secrets/apply-secret.sh`
 * Deploy infra apps in cluster:
   * `kubectl apply -f deploy/eks/argocd/apps/infrastructure-app.yaml`
-  * `kubectl apply -f deploy/eks/argocd/apps/tinder-app.yaml`
+  * `kubectl apply -f deploy/eks/argocd/apps/tinder-app.yaml`\
+* Expose local docker registry port: `kubectl port-forward -n infrastructure service/registry 5000:5000` 
+* Generate app images: 
+  * From the folder `be-components`: `docker build -t localhost:5000/profile-service:latest -f profile-service/Dockerfile .`
 
 
 

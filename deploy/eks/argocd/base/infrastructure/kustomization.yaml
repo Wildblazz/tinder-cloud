@@ -1,4 +1,5 @@
 resources:
 #  local docker hub
+  - registry/volume.yaml
   - registry/deployment.yaml
   - registry/service.yaml

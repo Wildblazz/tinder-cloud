@@ -79,8 +79,13 @@ The system will implement these key dating platform capabilities:
 * Expose local docker registry port: `kubectl port-forward -n infrastructure service/registry 5000:5000` 
 * Generate app images: 
   * From the folder `be-components`: `docker build -t localhost:5000/profile-service:latest -f profile-service/Dockerfile .`
+  * From the folder `be-components`: `docker build -t localhost:5000/reaction-service:latest -f reaction-service/Dockerfile .`
+  * From the folder `be-components`: `docker build -t localhost:5000/recommendation-service:latest -f recommendation-service/Dockerfile .`
+  * From the folder `be-components`: `docker build -t localhost:5000/match-service:latest -f match-service/Dockerfile .`
 
 
+* Useful commands:
+  * Port forward minikube service (for example KeyCloak): `minikube service keycloak -n tinder-space --url`
 
 Shield: [![CC BY-NC 4.0][cc-by-nc-shield]][cc-by-nc]
 

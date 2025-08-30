@@ -9,6 +9,9 @@ resources:
   - minio/volume.yaml
   - minio/deployment.yaml
   - minio/service.yaml
+  - kafka/statefulset.yaml
+  - kafka/deployment.yaml
+  - kafka/service.yaml
   - profile-service/configmap.yaml
   - profile-service/deployment.yaml
   - profile-service/service.yaml

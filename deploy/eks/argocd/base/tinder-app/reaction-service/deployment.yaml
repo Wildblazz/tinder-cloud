@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: reaction-service-app
+  namespace: tinder-space
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: reaction-service-app
+  template:
+    metadata:
+      labels:
+        app: reaction-service-app
+    spec:
+      containers:
+        - name: reaction-service-app
+          image: reaction-service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8083
+          envFrom:
+            - configMapRef:
+                name: reaction-config
+            - secretRef:
+                name: tinder-secrets

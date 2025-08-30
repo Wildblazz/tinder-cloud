@@ -2,6 +2,11 @@ resources:
   - postgres/configmap.yaml
   - postgres/volume.yaml
   - postgres/deployment.yaml
+  - postgres/service.yaml
+  - mongo/configmap.yaml
+  - mongo/volume.yaml
+  - mongo/deployment.yaml
+  - mongo/service.yaml
   - keycloak/configmap.yaml
   - keycloak/configmap-realm.yaml
   - keycloak/deployment.yaml

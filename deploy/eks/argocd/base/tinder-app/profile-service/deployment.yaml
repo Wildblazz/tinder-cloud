@@ -1,26 +1,26 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: profile-service
+  name: profile-service-app
+  namespace: tinder-space
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: profile-service
+      app: profile-service-app
   template:
     metadata:
       labels:
-        app: profile-service
+        app: profile-service-app
     spec:
       containers:
-        - name: profile-service
-          image: your-registry/profile-service:latest
+        - name: profile-service-app
+          image: profile-service:latest
+          imagePullPolicy: IfNotPresent
           ports:
-            - containerPort: 8080
-          env:
-            - name: SPRING_DATASOURCE_URL
-              value: jdbc:postgresql://postgres:5432/appdb
-            - name: SPRING_DATASOURCE_USERNAME
-              value: appuser
-            - name: SPRING_DATASOURCE_PASSWORD
-              value: apppass
+            - containerPort: 8082
+          envFrom:
+            - configMapRef:
+                name: profile-config
+            - secretRef:
+                name: tinder-secrets

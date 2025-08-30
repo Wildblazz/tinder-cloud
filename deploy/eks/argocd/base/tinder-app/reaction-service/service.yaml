@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: reaction-service
+  namespace: tinder-space
+spec:
+  type: ClusterIP
+  selector:
+    app: reaction-service
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8083
+      targetPort: 8083

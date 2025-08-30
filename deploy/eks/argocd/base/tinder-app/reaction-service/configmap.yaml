@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: reaction-config
+  namespace: tinder-space
+data:
+  POSTGRES_URL: "jdbc:postgresql://postgres:5432/reactions"

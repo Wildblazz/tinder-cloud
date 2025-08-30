@@ -78,10 +78,11 @@ The system will implement these key dating platform capabilities:
   * `kubectl apply -f deploy/eks/argocd/apps/tinder-app.yaml`\
 * Expose local docker registry port: `kubectl port-forward -n infrastructure service/registry 5000:5000` 
 * Generate app images: 
-  * From the folder `be-components`: `docker build -t localhost:5000/profile-service:latest -f profile-service/Dockerfile .`
-  * From the folder `be-components`: `docker build -t localhost:5000/reaction-service:latest -f reaction-service/Dockerfile .`
-  * From the folder `be-components`: `docker build -t localhost:5000/recommendation-service:latest -f recommendation-service/Dockerfile .`
-  * From the folder `be-components`: `docker build -t localhost:5000/match-service:latest -f match-service/Dockerfile .`
+  * Make images accessible inside minikube: `eval $(minikube docker-env)`
+  * From the folder `be-components`: `docker build -t profile-service:latest -f profile-service/Dockerfile .`
+  * From the folder `be-components`: `docker build -t reaction-service:latest -f reaction-service/Dockerfile .`
+  * From the folder `be-components`: `docker build -t recommendation-service:latest -f recommendation-service/Dockerfile .`
+  * From the folder `be-components`: `docker build -t match-service:latest -f match-service/Dockerfile .`
 
 
 * Useful commands:

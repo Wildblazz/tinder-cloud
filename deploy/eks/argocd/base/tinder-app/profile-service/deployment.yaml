@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: profile-service-app
-          image: localhost:5000/profile-service:latest
+          image: profile-service:latest
           ports:
             - containerPort: 8082
           envFrom:

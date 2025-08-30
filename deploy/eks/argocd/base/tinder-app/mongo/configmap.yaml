@@ -1,0 +1,12 @@
+apiVersion: v1
+data:
+  init.js: |
+    db = db.getSiblingDB('recommendation');
+    db.createCollection('recommendation');
+    db = db.getSiblingDB('matches');
+    db.createCollection('matches');
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: mongo-init-script
+  namespace: tinder-space

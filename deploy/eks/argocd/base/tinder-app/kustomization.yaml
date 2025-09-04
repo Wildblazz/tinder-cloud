@@ -23,3 +23,9 @@ resources:
   - reaction-service/configmap.yaml
   - reaction-service/deployment.yaml
   - reaction-service/service.yaml
+  - recommendation-service/configmap.yaml
+  - recommendation-service/deployment.yaml
+  - recommendation-service/service.yaml
+  - match-service/configmap.yaml
+  - match-service/deployment.yaml
+  - match-service/service.yaml

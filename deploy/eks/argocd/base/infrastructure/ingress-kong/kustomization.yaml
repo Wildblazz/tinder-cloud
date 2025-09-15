@@ -1,0 +1,8 @@
+resources:
+  - namespace.yaml
+  - configmap.yaml
+  - deployment.yaml
+  - ingress-class.yaml
+  - rbac.yaml
+  - service.yaml
+  - ingress.yaml

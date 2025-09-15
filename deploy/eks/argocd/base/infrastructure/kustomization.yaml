@@ -3,3 +3,4 @@ resources:
   - registry/volume.yaml
   - registry/deployment.yaml
   - registry/service.yaml
+  - ingress-kong/

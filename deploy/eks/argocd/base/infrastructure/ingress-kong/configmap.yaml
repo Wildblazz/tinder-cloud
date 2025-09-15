@@ -6,3 +6,4 @@ metadata:
 data:
   KONG_LOG_LEVEL: info
   KONG_PLUGINS: bundled
+  DOMAIN_NAME: tinder.localhost

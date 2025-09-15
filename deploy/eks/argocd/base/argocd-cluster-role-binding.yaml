@@ -8,5 +8,5 @@ roleRef:
   name: argocd-admin-clusterrole
 subjects:
   - kind: ServiceAccount
-    name: argocd-applicationset-controller
+    name: argocd-server
     namespace: argocd

@@ -1,7 +1,3 @@
 resources:
-#  local docker hub
   - ingress-kong/
-  - registry/volume.yaml
-  - registry/deployment.yaml
-  - registry/service.yaml
-
+  - registry/

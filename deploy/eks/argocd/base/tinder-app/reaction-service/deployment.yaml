@@ -4,7 +4,7 @@ metadata:
   name: reaction-service-app
   namespace: tinder-space
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: reaction-service-app

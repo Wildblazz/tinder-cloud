@@ -1,0 +1,18 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: recommendation-ingress
+  namespace: tinder-space
+spec:
+  ingressClassName: kong
+  rules:
+    - host: $(DOMAIN_NAME)
+      http:
+        paths:
+          - path: /api/recommendations
+            pathType: Prefix
+            backend:
+              service:
+                name: recommendation-service
+                port:
+                  number: 8085

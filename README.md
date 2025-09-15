@@ -63,8 +63,8 @@ The system will implement these key dating platform capabilities:
   * `chmod +x deploy/eks/argocd-init.sh` 
   * `./deploy/eks/argocd-init.sh`
 * Install kustomize: `brew install kustomize`
-  * To make ArgoCd UI accessible - `kubectl port-forward svc/argocd-server -n argocd 8080:443`
-  * ArgoCd UI: `https://localhost:8080`
+  * To make ArgoCd UI accessible - `kubectl port-forward svc/argocd-server -n argocd 8444:443`
+  * ArgoCd UI: `https://localhost:8444`
   * Login: admin. Get password: `kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d` -> string without % is password
 * Create ArgoCD apps:
   * `kubectl apply -f deploy/eks/argocd/app-projects/infrastructure.yaml` 
@@ -78,7 +78,7 @@ The system will implement these key dating platform capabilities:
   * `kubectl apply -f deploy/eks/argocd/apps/tinder-app.yaml`\
 * Expose local docker registry port: `kubectl port-forward -n infrastructure service/registry 5000:5000` 
 * Generate app images: 
-  * Make images accessible inside minikube: `eval $(minikube docker-env)`
+  * Make images accessible inside minikube BEFORE image building: `eval $(minikube docker-env)`
   * From the folder `be-components`: `docker build -t profile-service:latest -f profile-service/Dockerfile .`
   * From the folder `be-components`: `docker build -t reaction-service:latest -f reaction-service/Dockerfile .`
   * From the folder `be-components`: `docker build -t recommendation-service:latest -f recommendation-service/Dockerfile .`

@@ -7,25 +7,28 @@ resources:
   - mongo/volume.yaml
   - mongo/deployment.yaml
   - mongo/service.yaml
-  - keycloak/configmap.yaml
-  - keycloak/configmap-realm.yaml
-  - keycloak/deployment.yaml
-  - keycloak/service.yaml
+  - keycloak/
   - minio/volume.yaml
   - minio/deployment.yaml
   - minio/service.yaml
   - kafka/statefulset.yaml
   - kafka/deployment.yaml
   - kafka/service.yaml
-  - profile-service/configmap.yaml
-  - profile-service/deployment.yaml
-  - profile-service/service.yaml
-  - reaction-service/configmap.yaml
-  - reaction-service/deployment.yaml
-  - reaction-service/service.yaml
-  - recommendation-service/configmap.yaml
-  - recommendation-service/deployment.yaml
-  - recommendation-service/service.yaml
-  - match-service/configmap.yaml
-  - match-service/deployment.yaml
-  - match-service/service.yaml
+  - profile-service/
+  - reaction-service/
+  - recommendation-service/
+  - match-service/
+configMapGenerator:
+  - name: global-config
+    literals:
+      - DOMAIN_NAME=tinder.localhost
+replacements:
+  - source:
+      kind: ConfigMap
+      name: global-config
+      fieldPath: data.DOMAIN_NAME
+    targets:
+      - select:
+          kind: Ingress
+        fieldPaths:
+          - spec.rules.0.host

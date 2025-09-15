@@ -10,6 +10,8 @@ spec:
   destinations:
     - namespace: infrastructure
       server: https://kubernetes.default.svc
+    - namespace: ingress-kong
+      server: https://kubernetes.default.svc
   clusterResourceWhitelist:
     - group: '*'
       kind: '*'

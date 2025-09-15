@@ -1,5 +1,5 @@
 resources:
-#  local docker hub
-  - registry/volume.yaml
-  - registry/deployment.yaml
-  - registry/service.yaml
+  - argocd-cluster-role.yaml
+  - argocd-cluster-role-binding.yaml
+  - ingress-kong/
+  - registry/

@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ingress-kong
+  namespace: ingress-kong
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ingress-kong
+  template:
+    metadata:
+      labels:
+        app: ingress-kong
+    spec:
+      serviceAccountName: kong-serviceaccount
+      containers:
+        - name: proxy
+          image: kong:3.8
+          env:
+            - name: KONG_DATABASE
+              value: "off"
+            - name: KONG_PROXY_ACCESS_LOG
+              value: /dev/stdout
+            - name: KONG_ADMIN_ACCESS_LOG
+              value: /dev/stdout
+            - name: KONG_PROXY_ERROR_LOG
+              value: /dev/stderr
+            - name: KONG_ADMIN_ERROR_LOG
+              value: /dev/stderr
+            - name: KONG_ADMIN_LISTEN
+              value: "0.0.0.0:8001"
+          ports:
+            - name: proxy
+              containerPort: 8000
+            - name: proxy-ssl
+              containerPort: 8443
+            - name: admin
+              containerPort: 8001

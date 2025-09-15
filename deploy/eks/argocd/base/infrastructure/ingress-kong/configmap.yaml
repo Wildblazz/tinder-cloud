@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kong-config
+  namespace: ingress-kong
+data:
+  KONG_LOG_LEVEL: info
+  KONG_PLUGINS: bundled
+  DOMAIN_NAME: tinder.localhost

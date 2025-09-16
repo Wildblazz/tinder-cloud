@@ -3,8 +3,6 @@ kind: Ingress
 metadata:
   name: recommendation-ingress
   namespace: tinder-space
-  annotations:
-    konghq.com/strip-path: "true"
 spec:
   ingressClassName: kong
   rules:

@@ -9,7 +9,6 @@ spec:
       name: inside
     - port: 9093
       name: outside
-  clusterIP: None
   selector:
     app: kafka
 

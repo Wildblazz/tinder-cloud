@@ -1,0 +1,18 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: profile-ingress
+  namespace: tinder-space
+spec:
+  ingressClassName: kong
+  rules:
+    - host: $(DOMAIN_NAME)
+      http:
+        paths:
+          - path: /api/profiles
+            pathType: Prefix
+            backend:
+              service:
+                name: profile-service
+                port:
+                  number: 8082

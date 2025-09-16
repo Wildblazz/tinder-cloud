@@ -31,3 +31,13 @@ configMapGenerator:
   - name: global-config
     literals:
       - DOMAIN_NAME=tinder.localhost
+replacements:
+  - source:
+      kind: ConfigMap
+      name: global-config
+      fieldPath: data.DOMAIN_NAME
+    targets:
+      - select:
+          kind: Ingress
+        fieldPaths:
+          - spec.rules.0.host

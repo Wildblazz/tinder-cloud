@@ -30,8 +30,6 @@ spec:
               value: /dev/stderr
             - name: KONG_ADMIN_LISTEN
               value: "0.0.0.0:8001"
-            - name: CONTROLLER_INGRESS_CLASS
-              value: kong
           ports:
             - name: proxy
               containerPort: 8000
@@ -39,3 +37,11 @@ spec:
               containerPort: 8443
             - name: admin
               containerPort: 8001
+
+        - name: ingress-controller
+          image: kong/kubernetes-ingress-controller:3.2
+          args:
+            - "--ingress-class=kong"
+          env:
+            - name: CONTROLLER_KONG_ADMIN_URL
+              value: "http://localhost:8001"

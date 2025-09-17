@@ -1,8 +1,5 @@
 resources:
-  - namespace.yaml
-  - crds/
-  - ingress-class.yaml
-  - rbac.yaml
   - configmap.yaml
+  - volume.yaml
   - deployment.yaml
   - service.yaml

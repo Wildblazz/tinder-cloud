@@ -1,19 +1,9 @@
 resources:
-  - postgres/configmap.yaml
-  - postgres/volume.yaml
-  - postgres/deployment.yaml
-  - postgres/service.yaml
-  - mongo/configmap.yaml
-  - mongo/volume.yaml
-  - mongo/deployment.yaml
-  - mongo/service.yaml
+  - postgres/
+  - mongo/
   - keycloak/
-  - minio/volume.yaml
-  - minio/deployment.yaml
-  - minio/service.yaml
-  - kafka/statefulset.yaml
-  - kafka/deployment.yaml
-  - kafka/service.yaml
+  - minio/
+  - kafka/
   - profile-service/
   - reaction-service/
   - recommendation-service/

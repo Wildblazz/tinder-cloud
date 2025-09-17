@@ -3,6 +3,10 @@ kind: Deployment
 metadata:
   name: ingress-kong
   namespace: ingress-kong
+  labels:
+    app: ingress-kong
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
 spec:
   replicas: 1
   selector:
@@ -29,7 +33,9 @@ spec:
             - name: KONG_ADMIN_ERROR_LOG
               value: /dev/stderr
             - name: KONG_ADMIN_LISTEN
-              value: "0.0.0.0:8001"
+              value: 0.0.0.0:8001
+            - name: KONG_STATUS_LISTEN
+              value: 0.0.0.0:8100
           ports:
             - name: proxy
               containerPort: 8000
@@ -37,3 +43,48 @@ spec:
               containerPort: 8443
             - name: admin
               containerPort: 8001
+            - name: status
+              containerPort: 8100
+          readinessProbe:
+            httpGet:
+              path: /status
+              port: status
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 6
+          livenessProbe:
+            httpGet:
+              path: /status
+              port: status
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            failureThreshold: 3
+        - name: ingress-controller
+          # Don't forget to update a tag in deploy/eks/argocd/base/infrastructure/ingress-kong/crds/kustomization.yaml
+          image: kong/kubernetes-ingress-controller:3.5.0
+          args:
+            - --ingress-class=kong
+            - --publish-service=ingress-kong/kong-proxy
+            - --kong-admin-url=http://localhost:8001
+            - --health-probe-bind-address=:10254
+            - --metrics-bind-address=:10255
+          env:
+            - name: CONTROLLER_KONG_ADMIN_URL
+              value: http://localhost:8001
+          ports:
+            - name: health
+              containerPort: 10254
+            - name: metrics
+              containerPort: 10255
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: health
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: health
+            initialDelaySeconds: 15
+      restartPolicy: Always

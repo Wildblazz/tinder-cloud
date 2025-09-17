@@ -1,6 +1,6 @@
 #!/bin/bash
 
-minikube start --insecure-registry="localhost:5000"
+minikube start --cpus 10  --insecure-registry="localhost:5000"
 
 eval $(minikube docker-env)
 

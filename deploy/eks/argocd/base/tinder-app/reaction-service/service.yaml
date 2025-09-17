@@ -6,7 +6,7 @@ metadata:
 spec:
   type: ClusterIP
   selector:
-    app: reaction-service
+    app: reaction-service-app
   ports:
     - name: http
       protocol: TCP

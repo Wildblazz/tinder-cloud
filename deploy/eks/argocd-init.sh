@@ -6,4 +6,4 @@ kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/st
 
 kubectl port-forward svc/argocd-server -n argocd 8444:443 &
 
-sudo kubectl -n ingress-kong port-forward service/kong-proxy 80:80 &
+kubectl -n ingress-kong port-forward service/kong-proxy 8888:80 &

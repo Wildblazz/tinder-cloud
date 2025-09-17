@@ -30,6 +30,8 @@ spec:
               value: /dev/stderr
             - name: KONG_ADMIN_LISTEN
               value: "0.0.0.0:8001"
+            - name: CONTROLLER_INGRESS_CLASS
+              value: kong
           ports:
             - name: proxy
               containerPort: 8000

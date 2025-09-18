@@ -40,6 +40,8 @@ spec:
         - name: ingress-controller
           image: kong/kubernetes-ingress-controller:latest
           imagePullPolicy: IfNotPresent
+          args:
+            - "--ingress-class=kong"
           env:
             - name: CONTROLLER_KONG_ADMIN_SVC
               value: ingress-kong/kong-admin

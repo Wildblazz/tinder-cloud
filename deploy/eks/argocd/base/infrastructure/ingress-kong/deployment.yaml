@@ -37,11 +37,21 @@ spec:
               containerPort: 8443
             - name: admin
               containerPort: 8001
-
         - name: ingress-controller
-          image: kong/kubernetes-ingress-controller:3.2
+          image: kong/kubernetes-ingress-controller:latest
+          imagePullPolicy: IfNotPresent
           args:
-            - "--ingress-class=kong"
+              - "--ingress-class=kong"
           env:
-            - name: CONTROLLER_KONG_ADMIN_URL
-              value: "http://localhost:8001"
+              - name: CONTROLLER_KONG_ADMIN_URL
+                value: "http://localhost:8001"
+              - name: POD_NAME
+                valueFrom:
+                  fieldRef:
+                    apiVersion: v1
+                    fieldPath: metadata.name
+              - name: POD_NAMESPACE
+                valueFrom:
+                  fieldRef:
+                    apiVersion: v1
+                    fieldPath: metadata.namespace

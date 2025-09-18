@@ -42,11 +42,11 @@ spec:
           imagePullPolicy: IfNotPresent
           env:
             - name: CONTROLLER_KONG_ADMIN_SVC
-              value: kong/kong-admin
+              value: ingress-kong/kong-admin
             - name: CONTROLLER_KONG_ADMIN_TLS_SKIP_VERIFY
               value: "true"
             - name: CONTROLLER_PUBLISH_SERVICE
-              value: kong/kong-proxy
+              value: ingress-kong/kong-proxy
             - name: CONTROLLER_KONG_ADMIN_URL
               value: "http://localhost:8001"
             - name: POD_NAME

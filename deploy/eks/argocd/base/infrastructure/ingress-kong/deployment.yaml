@@ -42,9 +42,10 @@ spec:
           imagePullPolicy: IfNotPresent
           args:
             - "--ingress-class=kong"
+            - "--publish-service=ingress-kong/kong-proxy"
           env:
-            - name: CONTROLLER_KONG_ADMIN_SVC
-              value: ingress-kong/kong-admin
+#            - name: CONTROLLER_KONG_ADMIN_SVC
+#              value: ingress-kong/kong-admin
             - name: CONTROLLER_KONG_ADMIN_TLS_SKIP_VERIFY
               value: "true"
             - name: CONTROLLER_PUBLISH_SERVICE

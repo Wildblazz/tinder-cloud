@@ -3,6 +3,8 @@ kind: ServiceAccount
 metadata:
   name: kong-serviceaccount
   namespace: ingress-kong
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole

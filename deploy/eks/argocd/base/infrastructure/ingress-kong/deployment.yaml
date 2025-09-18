@@ -40,18 +40,22 @@ spec:
         - name: ingress-controller
           image: kong/kubernetes-ingress-controller:latest
           imagePullPolicy: IfNotPresent
-          args:
-              - "--ingress-class=kong"
           env:
-              - name: CONTROLLER_KONG_ADMIN_URL
-                value: "http://localhost:8001"
-              - name: POD_NAME
-                valueFrom:
-                  fieldRef:
-                    apiVersion: v1
-                    fieldPath: metadata.name
-              - name: POD_NAMESPACE
-                valueFrom:
-                  fieldRef:
-                    apiVersion: v1
-                    fieldPath: metadata.namespace
+            - name: CONTROLLER_KONG_ADMIN_SVC
+              value: kong/kong-admin
+            - name: CONTROLLER_KONG_ADMIN_TLS_SKIP_VERIFY
+              value: "true"
+            - name: CONTROLLER_PUBLISH_SERVICE
+              value: kong/kong-proxy
+            - name: CONTROLLER_KONG_ADMIN_URL
+              value: "http://localhost:8001"
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.name
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.namespace

@@ -3,6 +3,8 @@ kind: Deployment
 metadata:
   name: ingress-kong
   namespace: ingress-kong
+  labels:
+    app: ingress-kong
   annotations:
     argocd.argoproj.io/sync-wave: "3"
 spec:
@@ -31,7 +33,7 @@ spec:
             - name: KONG_ADMIN_ERROR_LOG
               value: /dev/stderr
             - name: KONG_ADMIN_LISTEN
-              value: "0.0.0.0:8001"
+              value: 0.0.0.0:8001
           ports:
             - name: proxy
               containerPort: 8000
@@ -39,28 +41,40 @@ spec:
               containerPort: 8443
             - name: admin
               containerPort: 8001
+          readinessProbe:
+            httpGet:
+              path: /status
+              port: admin
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /status
+              port: admin
+            initialDelaySeconds: 15
+            periodSeconds: 10
         - name: ingress-controller
-          image: kong/kubernetes-ingress-controller:latest
-          imagePullPolicy: IfNotPresent
+          image: kong/kubernetes-ingress-controller:3.5.0
           args:
-            - "--ingress-class=kong"
-            - "--publish-service=ingress-kong/kong-proxy"
+            - --ingress-class=kong
+            - --publish-service=ingress-kong/kong-proxy
+            - --kong-admin-url=http://localhost:8001
           env:
-#            - name: CONTROLLER_KONG_ADMIN_SVC
-#              value: ingress-kong/kong-admin
-            - name: CONTROLLER_KONG_ADMIN_TLS_SKIP_VERIFY
-              value: "true"
-            - name: CONTROLLER_PUBLISH_SERVICE
-              value: ingress-kong/kong-proxy
             - name: CONTROLLER_KONG_ADMIN_URL
-              value: "http://localhost:8001"
-            - name: POD_NAME
-              valueFrom:
-                fieldRef:
-                  apiVersion: v1
-                  fieldPath: metadata.name
-            - name: POD_NAMESPACE
-              valueFrom:
-                fieldRef:
-                  apiVersion: v1
-                  fieldPath: metadata.namespace
+              value: http://localhost:8001
+          ports:
+            - name: metrics
+              containerPort: 10255
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: metrics
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: metrics
+            initialDelaySeconds: 15
+            periodSeconds: 10
+      restartPolicy: Always

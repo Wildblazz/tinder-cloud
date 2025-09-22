@@ -9,4 +9,4 @@ kind: ConfigMap
 metadata:
   creationTimestamp: null
   name: mongo-init-script
-  namespace: tinder-space
+  namespace: infrastructure

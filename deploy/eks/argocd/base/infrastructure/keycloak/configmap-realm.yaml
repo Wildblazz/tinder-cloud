@@ -2181,4 +2181,4 @@ kind: ConfigMap
 metadata:
   creationTimestamp: null
   name: keycloak-realm-config
-  namespace: tinder-space
+  namespace: infrastructure

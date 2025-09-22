@@ -1,9 +1,4 @@
 resources:
-  - postgres/
-  - mongo/
-  - keycloak/
-  - minio/
-  - kafka/
   - profile-service/
   - reaction-service/
   - recommendation-service/

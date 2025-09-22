@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: kafka
-  namespace: tinder-space
+  namespace: infrastructure
 spec:
   serviceName: kafka
   replicas: 1
@@ -22,7 +22,7 @@ spec:
             - containerPort: 9093
           env:
             - name: KAFKA_ADVERTISED_LISTENERS
-              value: INSIDE://kafka-0.kafka.tinder-space.svc.cluster.local:9092,OUTSIDE://kafka-0.kafka.tinder-space.svc.cluster.local:9093
+              value: INSIDE://kafka-0.kafka.infrastructure.svc.cluster.local:9092,OUTSIDE://kafka-0.kafka.infrastructure.svc.cluster.local:9093
             - name: KAFKA_LISTENER_SECURITY_PROTOCOL_MAP
               value: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
             - name: KAFKA_LISTENERS
@@ -30,4 +30,4 @@ spec:
             - name: KAFKA_INTER_BROKER_LISTENER_NAME
               value: INSIDE
             - name: KAFKA_ZOOKEEPER_CONNECT
-              value: zookeeper.tinder-space.svc.cluster.local:2181
+              value: zookeeper.infrastructure.svc.cluster.local:2181

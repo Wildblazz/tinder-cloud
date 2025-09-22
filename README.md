@@ -74,9 +74,13 @@ The system will implement these key dating platform capabilities:
   * `chmod +x deploy/eks/argocd/secrets/apply-secret.sh`
   * `./deploy/eks/argocd/secrets/apply-secret.sh`
 * Deploy infra apps in cluster:
-  * `kubectl apply -f deploy/eks/argocd/apps/infrastructure-app.yaml`
-  * `kubectl apply -f deploy/eks/argocd/apps/tinder-app.yaml`\
+    * `kubectl apply -f deploy/eks/argocd/apps/infrastructure-app.yaml`
+    * `kubectl apply -f deploy/eks/argocd/apps/tinder-app.yaml`\
+* Deploy all resources in cluster:
+    * `kubectl apply -k deploy/eks/argocd/base/infrastructure/`
+    * `kubectl apply -k deploy/eks/argocd/base/tinder-app/`
 * Expose local docker registry port: `kubectl port-forward -n infrastructure service/registry 5000:5000` 
+* Expose local ingress port: `kubectl -n ingress-kong port-forward service/kong-proxy 8888:80 &` 
 * Generate app images: 
   * Make images accessible inside minikube BEFORE image building: `eval $(minikube docker-env)`
   * From the folder `be-components`: `docker build -t profile-service:latest -f profile-service/Dockerfile .`

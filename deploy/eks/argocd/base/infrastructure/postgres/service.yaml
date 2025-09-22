@@ -1,13 +1,13 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: mongodb
-  namespace: tinder-space
+  name: postgres
+  namespace: infrastructure
 spec:
   selector:
-    app: mongodb
+    app: postgres
   ports:
     - protocol: TCP
-      port: 27017
-      targetPort: 27017
+      port: 5432
+      targetPort: 5432
   type: ClusterIP

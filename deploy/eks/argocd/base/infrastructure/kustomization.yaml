@@ -1,5 +1,10 @@
 resources:
-  - argocd-cluster-role.yaml
-  - argocd-cluster-role-binding.yaml
+#  - argocd-cluster-role.yaml
+#  - argocd-cluster-role-binding.yaml
   - ingress-kong/
   - registry/
+  - postgres/
+  - mongo/
+  - minio/
+  - kafka/
+  - keycloak/

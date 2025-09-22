@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: keycloak
-  namespace: tinder-space
+  namespace: infrastructure
 spec:
   replicas: 1
   selector:

@@ -1,43 +1,43 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: mongodb
-  namespace: tinder-space
+  name: postgres
+  namespace: infrastructure
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: mongodb
+      app: postgres
   template:
     metadata:
       labels:
-        app: mongodb
+        app: postgres
     spec:
       containers:
-        - name: mongodb
-          image: mongo:8
+        - name: postgres
+          image: postgres:17
           ports:
-            - containerPort: 27017
+            - containerPort: 5432
           env:
-            - name: MONGO_INITDB_ROOT_USERNAME
+            - name: POSTGRES_USER
               valueFrom:
                 secretKeyRef:
                   name: tinder-secrets
-                  key: MONGODB_USERNAME
-            - name: MONGO_INITDB_ROOT_PASSWORD
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: tinder-secrets
-                  key: MONGODB_PASSWORD
+                  key: POSTGRES_PASSWORD
           volumeMounts:
-            - name: mongodb-data
-              mountPath: /data/db
+            - name: postgres-data
+              mountPath: /var/lib/postgresql/data
             - name: init-scripts
               mountPath: /docker-entrypoint-initdb.d
       volumes:
-        - name: mongodb-data
+        - name: postgres-data
           persistentVolumeClaim:
-            claimName: mongodb-pvc
+            claimName: postgres-pvc
         - name: init-scripts
           configMap:
-            name: mongo-init-script
+            name: postgres-init-script

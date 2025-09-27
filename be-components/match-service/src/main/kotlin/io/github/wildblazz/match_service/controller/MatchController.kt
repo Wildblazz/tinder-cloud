@@ -7,7 +7,7 @@ import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 
 @RestController
-@RequestMapping("/matches")
+@RequestMapping("/api/matches")
 class MatchController(private val matchService: MatchService) {
 
     @GetMapping("/{userId}")

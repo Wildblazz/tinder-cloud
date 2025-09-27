@@ -7,7 +7,7 @@ COPY . .
 RUN gradle :$APP_NAME:bootJar --no-daemon
 
 FROM openjdk:21-slim
-ENV SERVER_PORT=8084
+ENV SERVER_PORT=8083
 ARG APP_NAME
 WORKDIR /app
 COPY --from=build /project/$APP_NAME/build/libs/*.jar service.jar

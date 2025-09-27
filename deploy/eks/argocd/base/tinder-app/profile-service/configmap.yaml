@@ -4,6 +4,6 @@ metadata:
   name: profile-config
   namespace: tinder-space
 data:
-  POSTGRES_URL: "jdbc:postgresql://postgres:5432/profiles"
-  MINIO_URL: "http://minio-clusterip:9000"
+  POSTGRES_URL: "jdbc:postgresql://postgres.infrastructure.svc.cluster.local:5432/profiles"
+  MINIO_URL: "http://minio-clusterip.infrastructure.svc.cluster.local:9000"
   MINIO_BUCKET_NAME: "profile-photos"

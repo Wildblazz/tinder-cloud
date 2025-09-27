@@ -3,6 +3,8 @@ kind: Ingress
 metadata:
   name: profile-ingress
   namespace: tinder-space
+  annotations:
+    kubernetes.io/ingress.class: "kong"
 spec:
   ingressClassName: kong
   rules:

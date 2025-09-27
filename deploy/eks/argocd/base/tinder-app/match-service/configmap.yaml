@@ -4,6 +4,6 @@ metadata:
   name: match-config
   namespace: tinder-space
 data:
-  MONGO_HOST: "mongodb"
+  MONGO_HOST: "mongodb.infrastructure.svc.cluster.local"
   MONGO_PORT: "27017"
   MONGO_DB_NAME: "matches"

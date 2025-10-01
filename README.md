@@ -55,6 +55,8 @@ The system will implement these key dating platform capabilities:
 * Run with expected env variables. Example: `docker run -e MONGODB_USERNAME=admin -e MONGODB_PASSWORD=password -p 8084:8084 your-image-name`
 
 ### Kubernetes deployment
+* Run all: from the root folder run: `make` to deploy all following steps
+
 * Run minikube:
   * `chmod +x deploy/eks/minikube-init.sh`
   * `./deploy/eks/minikube-init.sh`
@@ -80,15 +82,19 @@ The system will implement these key dating platform capabilities:
 * Expose local docker registry port: `kubectl port-forward -n infrastructure service/registry 5000:5000` 
 * Expose local ingress port: `kubectl -n ingress-kong port-forward service/kong-proxy 8888:80 &` 
 * Generate app images: 
-  * Make images accessible inside minikube BEFORE image building: `eval $(minikube docker-env)`
-  * From the folder `be-components`: `docker build -t profile-service:latest -f profile-service/Dockerfile .`
-  * From the folder `be-components`: `docker build -t reaction-service:latest -f reaction-service/Dockerfile .`
-  * From the folder `be-components`: `docker build -t recommendation-service:latest -f recommendation-service/Dockerfile .`
-  * From the folder `be-components`: `docker build -t match-service:latest -f match-service/Dockerfile .`
+  * By script: `chmod +x deploy/eks/build-images.sh` and `./deploy/eks/build-images.sh`
+  * Or manually:
+    * Make images accessible inside minikube BEFORE image building: `eval $(minikube docker-env)`
+    * profile-service:        `docker build -t profile-service:latest -f be-components/profile-service/Dockerfile .`
+    * reaction-service:       `docker build -t reaction-service:latest -f be-components/reaction-service/Dockerfile .`
+    * recommendation-service: `docker build -t recommendation-service:latest -f be-components/recommendation-service/Dockerfile .`
+    * match-service:          `docker build -t match-service:latest -f be-components/match-service/Dockerfile .`
 
 
 * Useful commands:
   * Port forward minikube service (for example KeyCloak): `minikube service keycloak -n tinder-space --url`
+  * Restart all deployment in namespace: `kubectl get deployments -n infrastructure -o name | xargs kubectl rollout restart -n infrastructure
+`
 
 Shield: [![CC BY-NC 4.0][cc-by-nc-shield]][cc-by-nc]
 

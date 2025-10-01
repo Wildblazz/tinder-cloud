@@ -19,15 +19,16 @@
 *.tar.gz
 *.rar
 
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 replay_pid*
 /.idea/
-/deploy/.env
 */.gradle/
 */build/
 */.kotlin/
 /fe-components/
-/deploy/eks/argocd/secrets/.env.secrets
-/deploy/docker/.env
-/deploy/eks/argocd/secrets/secret.yaml.generated
+/deploy/eks/argocd/base/infrastructure/secrets/*.generated
+/deploy/eks/argocd/base/infrastructure/secrets/.env.secrets
+/deploy/eks/argocd/base/tinder-app/secrets/.env.secrets
+/deploy/eks/argocd/base/tinder-app/secrets/*.generated
+!/deploy/eks/argocd/base/infrastructure/secrets/*.template
+!/deploy/eks/argocd/base/tinder-app/secrets/*.template

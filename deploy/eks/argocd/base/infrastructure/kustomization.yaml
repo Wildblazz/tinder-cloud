@@ -1,8 +1,0 @@
-resources:
-  - ingress-kong/
-  - registry/
-  - postgres/
-  - mongo/
-  - minio/
-  - kafka/
-  - keycloak/

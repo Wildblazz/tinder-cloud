@@ -45,7 +45,7 @@ The system will implement these key dating platform capabilities:
 
 - [Link to architecture documentation](docs/architecture/high-level.md)
 
-### Local start
+### Local start in docker
 * Create `.env` file in the 'deploy/docker' directory. Use `.env-example` as a reference
 * From directory 'deploy/docker' run command: `docker compose --env-file .env up` to start DBs, KeyCloak, Kafka, etc
 
@@ -55,32 +55,9 @@ The system will implement these key dating platform capabilities:
 * Run with expected env variables. Example: `docker run -e MONGODB_USERNAME=admin -e MONGODB_PASSWORD=password -p 8084:8084 your-image-name`
 
 ### Kubernetes deployment
-* Run all: from the root folder run: `make` to deploy all following steps
+* Clone gitops repo: [Tinder-Cloud-GitOps](https://github.com/Wildblazz/tinder-cloud-gitops.git)
+* Use instructions in the [README](https://github.com/Wildblazz/tinder-cloud-gitops/blob/main/README.md#quick-start)
 
-* Run minikube:
-  * `chmod +x deploy/eks/minikube-init.sh`
-  * `./deploy/eks/minikube-init.sh`
-  * Optionally open minikube UI: `minikube dashboard`
-* Run ArgoCD:
-  * `chmod +x deploy/eks/argocd-init.sh` 
-  * `./deploy/eks/argocd-init.sh`
-* Install kustomize: `brew install kustomize`
-  * To make ArgoCd UI accessible - `kubectl port-forward svc/argocd-server -n argocd 8444:443`
-  * ArgoCd UI: `https://localhost:8444`
-  * Login: admin. Get password: `kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d` -> string without % is password
-* Create ArgoCD apps:
-  * `kubectl apply -f deploy/eks/argocd/app-projects/infrastructure.yaml` 
-  * `kubectl apply -f deploy/eks/argocd/app-projects/tinder-cloud.yaml`
-* Generate secrets and add into cluster:
-    * See detailed instructions in the [Secrets README](deploy/eks/argocd/secrets/README.md)
-* Deploy infra apps in cluster:
-    * `kubectl apply -f deploy/eks/argocd/apps/infrastructure-app.yaml`
-    * `kubectl apply -f deploy/eks/argocd/apps/tinder-app.yaml`\
-* Deploy all resources in cluster:
-    * `kubectl apply -k deploy/eks/argocd/base/infrastructure/`
-    * `kubectl apply -k deploy/eks/argocd/base/tinder-app/`
-* Expose local docker registry port: `kubectl port-forward -n infrastructure service/registry 5000:5000` 
-* Expose local ingress port: `kubectl -n ingress-kong port-forward service/kong-proxy 8888:80 &` 
 * Generate app images: 
   * By script: `chmod +x deploy/eks/build-images.sh` and `./deploy/eks/build-images.sh`
   * Or manually:
@@ -89,13 +66,7 @@ The system will implement these key dating platform capabilities:
     * reaction-service:       `docker build -t reaction-service:latest -f be-components/reaction-service/Dockerfile .`
     * recommendation-service: `docker build -t recommendation-service:latest -f be-components/recommendation-service/Dockerfile .`
     * match-service:          `docker build -t match-service:latest -f be-components/match-service/Dockerfile .`
-
-
-* Useful commands:
-  * Port forward minikube service (for example KeyCloak): `minikube service keycloak -n tinder-space --url`
-  * Restart all deployment in namespace: `kubectl get deployments -n infrastructure -o name | xargs kubectl rollout restart -n infrastructure
 `
-
 Shield: [![CC BY-NC 4.0][cc-by-nc-shield]][cc-by-nc]
 
 This work is licensed under a

@@ -26,9 +26,3 @@ replay_pid*
 */build/
 */.kotlin/
 /fe-components/
-/deploy/eks/argocd/base/infrastructure/secrets/*.generated
-/deploy/eks/argocd/base/infrastructure/secrets/.env.secrets
-/deploy/eks/argocd/base/tinder-app/secrets/.env.secrets
-/deploy/eks/argocd/base/tinder-app/secrets/*.generated
-!/deploy/eks/argocd/base/infrastructure/secrets/*.template
-!/deploy/eks/argocd/base/tinder-app/secrets/*.template

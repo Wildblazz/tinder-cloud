@@ -1,6 +1,0 @@
-resources:
-  - configmap.yaml
-  - configmap-realm.yaml
-  - deployment.yaml
-  - service.yaml
-  - ingress.yaml

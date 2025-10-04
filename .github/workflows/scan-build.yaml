@@ -40,17 +40,15 @@ jobs:
           
           if [ -n "$services" ]; then
             echo "services=$services" >> $GITHUB_OUTPUT
-            echo "has_changes=true" >> $GITHUB_OUTPUT
             echo "Changed services: $services"
           else
-            echo "has_changes=false" >> $GITHUB_OUTPUT
             echo "No services changed"
           fi
 
   build-services:
     runs-on: [self-hosted, arm64]
     needs: detect-changed-services
-    if: needs.detect-changed-services.outputs.has_changes == 'true'
+    if: needs.detect-changed-services.outputs.changed_services != ''
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -97,7 +95,7 @@ jobs:
   scan-services:
     runs-on: [self-hosted, x64]
     needs: [detect-changed-services, build-services]
-    if: needs.detect-changed-services.outputs.has_changes == 'true'
+    if: needs.detect-changed-services.outputs.changed_services != ''
     permissions:
       actions: read
       contents: read
@@ -140,7 +138,7 @@ jobs:
   test-and-build:
     runs-on: [self-hosted, arm64]
     needs: [detect-changed-services, build-services]
-    if: needs.detect-changed-services.outputs.has_changes == 'true'
+    if: needs.detect-changed-services.outputs.changed_services != ''
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -190,7 +188,7 @@ jobs:
   cleanup:
     runs-on: [self-hosted, arm64]
     needs: [scan-services, test-and-build]
-    if: always() && needs.detect-changed-services.outputs.has_changes == 'true'
+    if: always()
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4

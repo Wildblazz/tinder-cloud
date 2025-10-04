@@ -1,15 +1,37 @@
-version: "3.9"
-
 services:
-  github-runner:
+  github-runner-arm:
     image: myoung34/github-runner:latest
-    container_name: gh-runner
+    container_name: gh-runner-arm
     environment:
       REPO_URL: https://github.com/Wildblazz/tinder-cloud
-      RUNNER_TOKEN: ${RUNNER_TOKEN}
+      RUNNER_TOKEN: ${RUNNER_TOKEN_ARM}
       RUNNER_NAME: mac-arm-runner
       RUNNER_WORKDIR: /tmp/github-runner
       LABELS: mac,arm64,docker
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+      - runner-arm-home:/home/github
+      - runner-arm-tmp:/tmp/github-runner
     restart: unless-stopped
+
+  github-runner-x64:
+    image: myoung34/github-runner:latest
+    platform: linux/amd64
+    container_name: gh-runner-x64
+    environment:
+      REPO_URL: https://github.com/Wildblazz/tinder-cloud
+      RUNNER_TOKEN: ${RUNNER_TOKEN_X64}
+      RUNNER_NAME: mac-x64-runner
+      RUNNER_WORKDIR: /tmp/github-runner
+      LABELS: mac,x64,docker
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - runner-x64-home:/home/github
+      - runner-x64-tmp:/tmp/github-runner
+    restart: unless-stopped
+
+volumes:
+  runner-arm-home:
+  runner-arm-tmp:
+  runner-x64-home:
+  runner-x64-tmp:

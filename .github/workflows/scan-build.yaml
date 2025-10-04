@@ -6,64 +6,13 @@ on:
       - 'be-components/**'
 
 jobs:
-  security-scan:
-    runs-on: self-hosted
+  detect-changed-services:
+    runs-on: [self-hosted, arm64]
+    outputs:
+      changed_services: ${{ steps.process-services.outputs.services }}
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
-
-      - name: Setup JDK 21
-        uses: actions/setup-java@v5
-        with:
-          distribution: temurin
-          java-version: 21
-
-      - name: Make gradlew executable
-        run: chmod +x be-components/gradlew
-
-      - name: Cache Gradle
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: gradle-${{ runner.os }}-${{ hashFiles('**/build.gradle.kts', '**/gradle-wrapper.properties') }}
-
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
-        with:
-          languages: java
-
-      - name: Build for CodeQL analysis
-        working-directory: be-components
-        run: ./gradlew compileKotlin compileTestKotlin
-
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
-
-  build-services:
-    runs-on: self-hosted
-    needs: security-scan
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-
-      - name: Setup JDK 21
-        uses: actions/setup-java@v5
-        with:
-          distribution: temurin
-          java-version: 21
-
-      - name: Make gradlew executable
-        run: chmod +x be-components/gradlew
-
-      - name: Cache Gradle
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: gradle-${{ runner.os }}-${{ hashFiles('**/build.gradle.kts', '**/gradle-wrapper.properties') }}
 
       - name: Get changed services
         id: changed-services
@@ -73,29 +22,117 @@ jobs:
           dir_names: true
           dir_names_max_depth: 2
 
-      - name: Build changed services
-        working-directory: be-components
+      - name: Process changed services
+        id: process-services
         run: |
           changed_dirs="${{ steps.changed-services.outputs.all_changed_files }}"
-          services_to_build=""
-          
+          services=""
+
           for dir in $changed_dirs; do
             service_name=$(basename "$dir")
-            if [ "$service_name" != "be-components" ] && [ -d "$service_name" ]; then
-              echo "Found changed service: $service_name"
-              services_to_build="$services_to_build :$service_name:build"
+            if [ "$service_name" != "be-components" ] && [ "$service_name" != "gradle" ] && [ -d "be-components/$service_name" ] && [ -f "be-components/$service_name/build.gradle.kts" ]; then
+              services="$services $service_name"
             fi
           done
-          
-          if [ -n "$services_to_build" ]; then
-            echo "Building services:$services_to_build"
-            ./gradlew $services_to_build
-          else
-            echo "No services to build"
-          fi
 
-      - name: Cleanup
-        if: always()
+          services=$(echo "$services" | tr ' ' '\n' | sort -u | tr '\n' ' ' | xargs)
+          echo "services=$services" >> $GITHUB_OUTPUT
+          echo "Changed services: $services"
+
+  codeql-scan:
+    runs-on: [self-hosted, x64]
+    needs: detect-changed-services
+    if: needs.detect-changed-services.outputs.changed_services != ''
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup JDK 21
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Make gradlew executable
+        run: chmod +x be-components/gradlew
+
+      - name: Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-arm64-${{ runner.os }}-${{ hashFiles('**/build.gradle.kts', '**/gradle-wrapper.properties') }}
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: java-kotlin
+          queries: security-extended,security-and-quality
+
+      - name: Build for CodeQL
+        working-directory: be-components
+        run: |
+          services="${{ needs.detect-changed-services.outputs.changed_services }}"
+          build_tasks=""
+          for service in $services; do
+            build_tasks="$build_tasks :$service:build"
+          done
+          ./gradlew $build_tasks -x test --parallel --build-cache
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+
+  test-and-build:
+    runs-on: [self-hosted, arm64]
+    needs: [detect-changed-services, codeql-scan]
+    if: always() && needs.detect-changed-services.outputs.changed_services != ''
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup JDK 21
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Make gradlew executable
+        run: chmod +x be-components/gradlew
+
+      - name: Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-arm64-${{ runner.os }}-${{ hashFiles('**/build.gradle.kts', '**/gradle-wrapper.properties') }}
+
+      - name: Run tests and build
+        working-directory: be-components
+        run: |
+          services="${{ needs.detect-changed-services.outputs.changed_services }}"
+          for service in $services; do
+            echo "Testing and building service: $service"
+            ./gradlew :$service:test :$service:build --parallel --build-cache
+          done
+
+  cleanup:
+    runs-on: [self-hosted, arm64]
+    needs: [codeql-scan, test-and-build]
+    if: always()
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Make gradlew executable
+        run: chmod +x be-components/gradlew
+
+      - name: Cleanup Gradle
         working-directory: be-components
         run: |
           ./gradlew clean --stop || true

@@ -47,14 +47,10 @@ jobs:
 
       - name: Post-build cleanup
         if: always()
+        working-directory: be-components
         run: |
-          # Clean Gradle build outputs
-          cd be-components && ./gradlew clean --stop
-
-          # Remove workspace contents
+          ./gradlew clean --stop
+          cd ..
           rm -rf ${{ github.workspace }}/*
           rm -rf ${{ github.workspace }}/.[!.]*
-
-          # Clean system temp files (optional)
-          rm -rf /tmp/gradle-*
         continue-on-error: true

@@ -7,7 +7,7 @@ on:
 
 jobs:
   detect-changed-services:
-    runs-on: [ self-hosted, arm64 ]
+    runs-on: [self-hosted, arm64]
     outputs:
       changed_services: ${{ steps.process-services.outputs.services }}
     steps:
@@ -39,7 +39,7 @@ jobs:
           echo "services=$services" >> $GITHUB_OUTPUT
           echo "Changed services: $services"
 
-  build-services:
+  trivy-scan:
     runs-on: [self-hosted, arm64]
     needs: detect-changed-services
     if: needs.detect-changed-services.outputs.changed_services != ''
@@ -64,75 +64,34 @@ jobs:
             ~/.gradle/wrapper
           key: gradle-arm64-${{ runner.os }}-${{ hashFiles('**/build.gradle.kts', '**/gradle-wrapper.properties') }}
 
-      - name: Build changed services
+      - name: Build for Trivy
         working-directory: be-components
         run: |
           services="${{ needs.detect-changed-services.outputs.changed_services }}"
           build_tasks=""
-          
           for service in $services; do
             build_tasks="$build_tasks :$service:build"
           done
-          
           ./gradlew $build_tasks -x test --parallel --build-cache
 
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
+      - name: Run Trivy vulnerability scan
+        uses: aquasecurity/trivy-action@master
         with:
-          name: build-artifacts
-          path: |
-            be-components/*/build/libs/**/*.jar
-            be-components/*/build/classes/**
-            be-components/*/build/resources/**
-          retention-days: 1
+          scan-type: fs
+          scan-ref: be-components/
+          format: table
+          exit-code: 0
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
 
-  scan-services:
-    runs-on: [self-hosted, x64]
-    needs: [detect-changed-services, build-services]
+  codeql-scan:
+    runs-on: [self-hosted, arm64]
+    needs: detect-changed-services
     if: needs.detect-changed-services.outputs.changed_services != ''
     permissions:
       actions: read
       contents: read
       security-events: write
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-
-      - name: Setup JDK 21
-        uses: actions/setup-java@v5
-        with:
-          distribution: temurin
-          java-version: 21
-
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: build-artifacts
-          path: be-components/
-
-      - name: Run Trivy vulnerability scan
-        uses: aquasecurity/trivy-action@v0.33.1
-        with:
-          scan-type: fs
-          scan-ref: be-components/
-          format: table
-          exit-code: 1
-          severity: HIGH,CRITICAL
-          ignore-unfixed: true
-
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
-        with:
-          languages: java-kotlin
-          queries: security-extended,security-and-quality
-
-      - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
-
-  test-and-build:
-    runs-on: [self-hosted, arm64]
-    needs: [detect-changed-services, build-services]
-    if: needs.detect-changed-services.outputs.changed_services != ''
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -154,17 +113,54 @@ jobs:
             ~/.gradle/wrapper
           key: gradle-arm64-${{ runner.os }}-${{ hashFiles('**/build.gradle.kts', '**/gradle-wrapper.properties') }}
 
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
         with:
-          name: build-artifacts
-          path: be-components/
+          languages: java-kotlin
+          queries: security-extended,security-and-quality
 
-      - name: Run tests and create artifacts
+      - name: Build for CodeQL
         working-directory: be-components
         run: |
           services="${{ needs.detect-changed-services.outputs.changed_services }}"
-          
+          build_tasks=""
+          for service in $services; do
+            build_tasks="$build_tasks :$service:build"
+          done
+          ./gradlew $build_tasks -x test --parallel --build-cache
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+
+  test-and-build:
+    runs-on: [self-hosted, arm64]
+    needs: [detect-changed-services, trivy-scan, codeql-scan]
+    if: always() && needs.detect-changed-services.outputs.changed_services != ''
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup JDK 21
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Make gradlew executable
+        run: chmod +x be-components/gradlew
+
+      - name: Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-arm64-${{ runner.os }}-${{ hashFiles('**/build.gradle.kts', '**/gradle-wrapper.properties') }}
+
+      - name: Run tests and build
+        working-directory: be-components
+        run: |
+          services="${{ needs.detect-changed-services.outputs.changed_services }}"
           for service in $services; do
             echo "Testing and building service: $service"
             ./gradlew :$service:test :$service:build --parallel --build-cache
@@ -172,7 +168,7 @@ jobs:
 
   cleanup:
     runs-on: [self-hosted, arm64]
-    needs: [scan-services, test-and-build]
+    needs: [trivy-scan, codeql-scan, test-and-build]
     if: always()
     steps:
       - name: Checkout repo

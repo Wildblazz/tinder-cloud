@@ -7,6 +7,7 @@ plugins {
     kotlin("plugin.spring") version "2.1.20"
     id("org.springframework.boot") version "3.4.5"
     id("io.spring.dependency-management") version "1.1.7"
+    id("org.owasp.dependencycheck") version "8.4.0"
 }
 
 allprojects {
@@ -15,6 +16,12 @@ allprojects {
         plugin("io.spring.dependency-management")
         plugin("org.jetbrains.kotlin.jvm")
         plugin("org.jetbrains.kotlin.plugin.spring")
+        plugin("org.owasp.dependencycheck")
+    }
+
+    dependencyCheck {
+        formats = listOf("HTML", "JSON")
+        suppressionFile = "dependency-check-suppressions.xml"
     }
 
     dependencies {

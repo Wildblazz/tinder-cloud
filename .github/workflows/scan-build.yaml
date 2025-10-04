@@ -1,0 +1,102 @@
+name: Scan and Build Services
+
+on:
+  pull_request:
+    paths:
+      - 'be-components/**'
+
+jobs:
+  security-scan:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup JDK 21
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Make gradlew executable
+        run: chmod +x be-components/gradlew
+
+      - name: Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('**/build.gradle.kts', '**/gradle-wrapper.properties') }}
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: java
+
+      - name: Build for CodeQL analysis
+        working-directory: be-components
+        run: ./gradlew compileKotlin compileTestKotlin
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+
+  build-services:
+    runs-on: self-hosted
+    needs: security-scan
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup JDK 21
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Make gradlew executable
+        run: chmod +x be-components/gradlew
+
+      - name: Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ runner.os }}-${{ hashFiles('**/build.gradle.kts', '**/gradle-wrapper.properties') }}
+
+      - name: Get changed services
+        id: changed-services
+        uses: tj-actions/changed-files@v45
+        with:
+          files: be-components/**
+          dir_names: true
+          dir_names_max_depth: 2
+
+      - name: Build changed services
+        working-directory: be-components
+        run: |
+          changed_dirs="${{ steps.changed-services.outputs.all_changed_files }}"
+          services_to_build=""
+          
+          for dir in $changed_dirs; do
+            service_name=$(basename "$dir")
+            if [ "$service_name" != "be-components" ] && [ -d "$service_name" ]; then
+              echo "Found changed service: $service_name"
+              services_to_build="$services_to_build :$service_name:build"
+            fi
+          done
+          
+          if [ -n "$services_to_build" ]; then
+            echo "Building services:$services_to_build"
+            ./gradlew $services_to_build
+          else
+            echo "No services to build"
+          fi
+
+      - name: Cleanup
+        if: always()
+        working-directory: be-components
+        run: |
+          ./gradlew clean --stop || true
+        continue-on-error: true

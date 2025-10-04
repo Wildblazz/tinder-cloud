@@ -26,3 +26,5 @@ replay_pid*
 */build/
 */.kotlin/
 /fe-components/
+/.github/self-hosted-renner/.env
+/deploy/docker/.env

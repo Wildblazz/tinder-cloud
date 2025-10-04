@@ -1,0 +1,60 @@
+name: Manual Service Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      service:
+        description: "Service name"
+        required: true
+        type: choice
+        options:
+          - profile-service
+          - recommendation-service
+          - match-service
+          - reaction-service
+          - shared-module
+
+jobs:
+  build:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup JDK 21
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Make gradlew executable
+        run: chmod +x be-components/gradlew
+
+      - name: Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+            ~/.gradle/build-cache
+          key: gradle-${{ runner.os }}-${{ hashFiles('**/build.gradle.kts', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            gradle-${{ runner.os }}
+
+      - name: Build selected service
+        working-directory: be-components
+        run: ./gradlew :${{ github.event.inputs.service }}:clean :${{ github.event.inputs.service }}:build
+
+      - name: Post-build cleanup
+        if: always()
+        run: |
+          # Clean Gradle build outputs
+          cd be-components && ./gradlew clean --stop
+
+          # Remove workspace contents
+          rm -rf ${{ github.workspace }}/*
+          rm -rf ${{ github.workspace }}/.[!.]*
+
+          # Clean system temp files (optional)
+          rm -rf /tmp/gradle-*
+        continue-on-error: true

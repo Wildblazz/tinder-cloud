@@ -6,8 +6,12 @@ on:
       - 'be-components/**'
 
 jobs:
-  security-scan:
-    runs-on: self-hosted
+  codeql-analysis:
+    runs-on: [self-hosted, x64]
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -18,6 +22,12 @@ jobs:
           distribution: temurin
           java-version: 21
 
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: java-kotlin
+          queries: security-extended,security-and-quality
+
       - name: Make gradlew executable
         run: chmod +x be-components/gradlew
 
@@ -27,55 +37,19 @@ jobs:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-          key: gradle-${{ runner.os }}-${{ hashFiles('**/build.gradle.kts', '**/gradle-wrapper.properties') }}
+          key: gradle-x64-${{ runner.os }}-${{ hashFiles('**/build.gradle.kts', '**/gradle-wrapper.properties') }}
 
-      - name: Cache OWASP NVD Database
-        uses: actions/cache@v4
-        with:
-          path: ~/.gradle/dependency-check-data
-          key: owasp-nvd-${{ runner.os }}-${{ hashFiles('**/build.gradle.kts') }}
-          restore-keys: |
-            owasp-nvd-${{ runner.os }}-
-
-      - name: Run OWASP Dependency Check
+      - name: Build for CodeQL Analysis
         working-directory: be-components
         run: |
-          ./gradlew dependencyCheckAggregate \
-            --info \
-            --stacktrace \
-            -Dorg.gradle.daemon=false
-        continue-on-error: true
+          ./gradlew build -x test --parallel --build-cache
 
-      - name: Upload OWASP Reports
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: owasp-dependency-check-reports
-          path: |
-            be-components/build/reports/
-            be-components/*/build/reports/
-          retention-days: 30
-
-      - name: Check for High/Critical Vulnerabilities
-        working-directory: be-components
-        run: |
-          if [ -f "build/reports/dependency-check-report.json" ]; then
-            high_critical=$(grep -o '"severity":"HIGH\|CRITICAL"' build/reports/dependency-check-report.json | wc -l || echo "0")
-            if [ "$high_critical" -gt 0 ]; then
-              echo "⚠️ Found $high_critical HIGH/CRITICAL vulnerabilities!"
-              echo "Please review the OWASP report in the artifacts."
-              exit 1
-            else
-              echo "✅ No HIGH/CRITICAL vulnerabilities found."
-            fi
-          else
-            echo "⚠️ OWASP report not found, check previous step."
-            exit 1
-          fi
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
 
   build-services:
-    runs-on: self-hosted
-    needs: security-scan
+    runs-on: [self-hosted, arm64]
+    needs: [codeql-analysis]
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -95,7 +69,7 @@ jobs:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-          key: gradle-${{ runner.os }}-${{ hashFiles('**/build.gradle.kts', '**/gradle-wrapper.properties') }}
+          key: gradle-arm64-${{ runner.os }}-${{ hashFiles('**/build.gradle.kts', '**/gradle-wrapper.properties') }}
 
       - name: Get changed services
         id: changed-services

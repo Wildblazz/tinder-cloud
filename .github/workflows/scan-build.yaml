@@ -111,7 +111,7 @@ jobs:
           path: be-components/
 
       - name: Run Trivy vulnerability scan
-        uses: aquasecurity/trivy-action@v0.16.0
+        uses: aquasecurity/trivy-action@v0.33.1
         with:
           scan-type: fs
           scan-ref: be-components/
@@ -169,15 +169,6 @@ jobs:
             echo "Testing and building service: $service"
             ./gradlew :$service:test :$service:build --parallel --build-cache
           done
-
-      - name: Upload final artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: final-artifacts
-          path: |
-            be-components/*/build/libs/**/*.jar
-            be-components/*/build/reports/**
-          retention-days: 7
 
   cleanup:
     runs-on: [self-hosted, arm64]

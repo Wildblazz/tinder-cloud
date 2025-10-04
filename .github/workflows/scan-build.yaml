@@ -7,10 +7,9 @@ on:
 
 jobs:
   detect-changed-services:
-    runs-on: [self-hosted, arm64]
+    runs-on: [ self-hosted, arm64 ]
     outputs:
-      changed_services: ${{ steps.changed-services.outputs.services }}
-      has_changes: ${{ steps.changed-services.outputs.has_changes }}
+      changed_services: ${{ steps.process-services.outputs.services }}
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -28,22 +27,17 @@ jobs:
         run: |
           changed_dirs="${{ steps.changed-services.outputs.all_changed_files }}"
           services=""
-          
+
           for dir in $changed_dirs; do
             service_name=$(basename "$dir")
             if [ "$service_name" != "be-components" ] && [ "$service_name" != "gradle" ] && [ -d "be-components/$service_name" ] && [ -f "be-components/$service_name/build.gradle.kts" ]; then
               services="$services $service_name"
             fi
           done
-          
+
           services=$(echo "$services" | tr ' ' '\n' | sort -u | tr '\n' ' ' | xargs)
-          
-          if [ -n "$services" ]; then
-            echo "services=$services" >> $GITHUB_OUTPUT
-            echo "Changed services: $services"
-          else
-            echo "No services changed"
-          fi
+          echo "services=$services" >> $GITHUB_OUTPUT
+          echo "Changed services: $services"
 
   build-services:
     runs-on: [self-hosted, arm64]

@@ -52,27 +52,52 @@ jobs:
         run: |
           services="${{ needs.detect-changed-services.outputs.changed_services }}"
           echo "Scanning changed services: $services"
-
+          
           exit_code=0
-
+          pr_comment=""
+          
           for service in $services; do
             echo "::group::Scanning service: $service"
-
-            # Run Trivy with table format for PR visibility and exit code 1 on findings
-            if ! trivy fs --format table --severity HIGH,CRITICAL --ignore-unfixed ./$service/; then
+          
+            # Create output directory
+            mkdir -p trivy-results
+          
+            # Run Trivy with SARIF output for GitHub Security tab
+            trivy fs --format sarif --output trivy-results/$service-sarif.json ./$service/
+          
+            # Run Trivy with table format for PR comment
+            trivy fs --format table --severity HIGH,CRITICAL --ignore-unfixed ./$service/ > trivy-results/$service-table.txt 2>&1 || true
+          
+            # Run Trivy with exit code check
+            if ! trivy fs --format table --severity HIGH,CRITICAL --ignore-unfixed ./$service/ > /dev/null 2>&1; then
               echo "❌ HIGH/CRITICAL vulnerabilities found in $service"
               exit_code=1
+          
+              # Add to PR comment
+              pr_comment="$pr_comment\n\n### 🚨 Vulnerabilities found in \`$service\`\n\n"
+              pr_comment="$pr_comment\`\`\`\n$(cat trivy-results/$service-table.txt)\n\`\`\`"
             else
               echo "✅ No HIGH/CRITICAL vulnerabilities found in $service"
+              pr_comment="$pr_comment\n\n### ✅ No HIGH/CRITICAL vulnerabilities found in \`$service\`"
             fi
-
+          
             echo "::endgroup::"
           done
-
+          
+          # Save PR comment content
+          echo -e "$pr_comment" > trivy-results/pr-comment.md
+          
           if [ $exit_code -ne 0 ]; then
             echo "::error::HIGH/CRITICAL vulnerabilities detected in one or more services"
             exit 1
           fi
+
+      - name: Upload Trivy SARIF results
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: be-components/trivy-results/
+          category: trivy
 
   codeql-scan:
     runs-on: [self-hosted, x64]

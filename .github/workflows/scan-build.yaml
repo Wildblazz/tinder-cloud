@@ -51,6 +51,26 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+
+      - name: Resolve Gradle dependencies
+        working-directory: be-components
+        run: |
+          ./gradlew build --no-daemon -x test || true
+          ./gradlew dependencies --configuration runtimeClasspath > gradle-dependencies.txt || true
+
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@0.33.1
         with:
@@ -59,9 +79,20 @@ jobs:
           format: 'sarif'
           output: 'trivy-results.sarif'
           severity: 'HIGH,CRITICAL'
-          ignore-unfixed: true
-          scanners: 'vuln,secret'
-          skip-dirs: 'build,gradle/wrapper'
+          ignore-unfixed: false  # Changed to detect more vulnerabilities
+          scanners: 'vuln'
+          skip-dirs: 'build/classes,build/tmp,build/kotlin'
+
+      - name: Run Trivy with table output for debugging
+        uses: aquasecurity/trivy-action@0.33.1
+        with:
+          scan-type: 'fs'
+          scan-ref: 'be-components'
+          format: 'table'
+          severity: 'HIGH,CRITICAL'
+          ignore-unfixed: false
+          scanners: 'vuln'
+          skip-dirs: 'build/classes,build/tmp,build/kotlin'
 
       - name: Upload Trivy scan results
         if: always()

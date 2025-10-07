@@ -40,69 +40,44 @@ jobs:
           echo "Changed services: $services"
 
   trivy-scan:
-    runs-on: [self-hosted, arm64]
+    runs-on: [ self-hosted, arm64 ]
     needs: detect-changed-services
     if: needs.detect-changed-services.outputs.changed_services != ''
+    permissions:
+      contents: read
+      security-events: write
+      pull-requests: write
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Run Trivy vulnerability scan
-        working-directory: be-components
-        run: |
-          services="${{ needs.detect-changed-services.outputs.changed_services }}"
-          echo "Scanning changed services: $services"
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: 'be-components'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'HIGH,CRITICAL'
+          ignore-unfixed: true
 
-          exit_code=0
-          pr_comment=""
-
-          # Create consolidated output directory
-          mkdir -p trivy-results/sarif
-
-          for service in $services; do
-            echo "::group::Scanning service: $service"
-
-            # Run Trivy with SARIF output for GitHub Security tab
-            trivy fs --format sarif --output trivy-results/sarif/$service.sarif ./$service/
-
-            # Run Trivy with table format for PR comment
-            trivy fs --format table --severity HIGH,CRITICAL --ignore-unfixed ./$service/ > trivy-results/$service-table.txt 2>&1 || true
-
-            # Run Trivy with exit code check
-            if ! trivy fs --format table --severity HIGH,CRITICAL --ignore-unfixed ./$service/ > /dev/null 2>&1; then
-              echo "❌ HIGH/CRITICAL vulnerabilities found in $service"
-              exit_code=1
-
-              # Add to PR comment
-              pr_comment="$pr_comment\n\n### 🚨 Vulnerabilities found in \`$service\`\n\n"
-              pr_comment="$pr_comment\`\`\`\n$(cat trivy-results/$service-table.txt)\n\`\`\`"
-            else
-              echo "✅ No HIGH/CRITICAL vulnerabilities found in $service"
-              pr_comment="$pr_comment\n\n### ✅ No HIGH/CRITICAL vulnerabilities found in \`$service\`"
-            fi
-
-            echo "::endgroup::"
-          done
-
-          # Save PR comment content
-          echo -e "$pr_comment" > trivy-results/pr-comment.md
-
-          # List generated SARIF files for debugging
-          echo "Generated SARIF files:"
-          ls -la trivy-results/sarif/ || echo "No SARIF files found"
-
-          if [ $exit_code -ne 0 ]; then
-            echo "::error::HIGH/CRITICAL vulnerabilities detected in one or more services"
-            exit 1
-          fi
-
-      - name: Upload Trivy SARIF results
+      - name: Upload Trivy scan results to GitHub Security tab
         if: always()
         uses: github/codeql-action/upload-sarif@v3
         with:
-          sarif_file: be-components/trivy-results/sarif/
-          category: trivy
+          sarif_file: 'trivy-results.sarif'
+          category: 'trivy'
         continue-on-error: true
+
+      - name: Run Trivy for PR comment
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: 'be-components'
+          format: 'table'
+          severity: 'HIGH,CRITICAL'
+          ignore-unfixed: true
+          output: 'trivy-table.txt'
 
 #  codeql-scan:
 #    runs-on: [self-hosted, x64]

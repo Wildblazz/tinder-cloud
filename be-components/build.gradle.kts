@@ -1,13 +1,11 @@
 group = "io.github.wildblazz"
 version = "0.0.1-SNAPSHOT"
 
-
 plugins {
     kotlin("jvm") version "2.1.20"
     kotlin("plugin.spring") version "2.1.20"
     id("org.springframework.boot") version "3.4.5"
     id("io.spring.dependency-management") version "1.1.7"
-    id("org.owasp.dependencycheck") version "12.1.6"
 }
 
 allprojects {
@@ -16,12 +14,6 @@ allprojects {
         plugin("io.spring.dependency-management")
         plugin("org.jetbrains.kotlin.jvm")
         plugin("org.jetbrains.kotlin.plugin.spring")
-        plugin("org.owasp.dependencycheck")
-    }
-
-    dependencyCheck {
-        formats = listOf("HTML", "JSON")
-        suppressionFile = "dependency-check-suppressions.xml"
     }
 
     dependencies {
@@ -67,13 +59,11 @@ allprojects {
         }
     }
 
-    allOpen {
-        annotation("jakarta.persistence.Entity")
-        annotation("jakarta.persistence.MappedSuperclass")
-        annotation("jakarta.persistence.Embeddable")
-    }
-
     tasks.withType<Test> {
         useJUnitPlatform()
+    }
+
+    tasks.named<org.springframework.boot.gradle.tasks.bundling.BootJar>("bootJar") {
+        enabled = false
     }
 }

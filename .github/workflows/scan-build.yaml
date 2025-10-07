@@ -68,8 +68,14 @@ jobs:
       - name: Resolve Gradle dependencies
         working-directory: be-components
         run: |
-          ./gradlew build --no-daemon -x test || true
-          ./gradlew dependencies --configuration runtimeClasspath > gradle-dependencies.txt || true
+          services="${{ needs.detect-changed-services.outputs.changed_services }}"
+          build_tasks=":shared:build"
+          for service in $services; do
+            build_tasks="$build_tasks :$service:build"
+          done
+          ./gradlew $build_tasks --no-daemon -x test || true
+          ./gradlew $build_tasks dependencies --configuration runtimeClasspath > gradle-dependencies.txt || true
+      
 
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@0.33.1

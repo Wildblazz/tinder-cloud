@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
   github-runner-arm:
     image: myoung34/github-runner:latest
@@ -12,6 +10,7 @@ services:
       LABELS: mac,arm64,docker
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+      - runner-arm-home:/home/github
       - runner-arm-tmp:/tmp/github-runner
     restart: unless-stopped
 
@@ -27,9 +26,12 @@ services:
       LABELS: mac,x64,docker
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+      - runner-x64-home:/home/github
       - runner-x64-tmp:/tmp/github-runner
     restart: unless-stopped
 
 volumes:
+  runner-arm-home:
   runner-arm-tmp:
+  runner-x64-home:
   runner-x64-tmp:

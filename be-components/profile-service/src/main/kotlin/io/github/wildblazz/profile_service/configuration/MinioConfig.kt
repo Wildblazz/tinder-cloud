@@ -4,6 +4,7 @@ import io.minio.MinioClient
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Profile
 
 @Configuration
 class MinioConfig {
@@ -18,6 +19,7 @@ class MinioConfig {
     private lateinit var secretKey: String
 
     @Bean
+    @Profile("!test")
     fun minioClient(): MinioClient {
         return MinioClient.builder()
             .endpoint(endpoint)

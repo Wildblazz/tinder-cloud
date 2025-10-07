@@ -11,4 +11,5 @@ dependencies {
     implementation("io.minio:minio:8.5.17")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.postgresql:postgresql:42.7.5")
+    testImplementation("com.h2database:h2:2.4.240")
 }

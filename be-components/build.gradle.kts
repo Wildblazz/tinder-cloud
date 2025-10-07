@@ -5,8 +5,8 @@ version = "0.0.1-SNAPSHOT"
 plugins {
     kotlin("jvm") version "2.1.20"
     kotlin("plugin.spring") version "2.1.20"
-    id("org.springframework.boot") version "3.4.5"
-    id("io.spring.dependency-management") version "1.1.7"
+    id("org.springframework.boot") version "3.1.2"
+    id("io.spring.dependency-management") version "1.1.0"
     id("org.owasp.dependencycheck") version "8.4.0"
 }
 

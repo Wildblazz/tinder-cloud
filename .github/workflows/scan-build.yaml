@@ -61,23 +61,12 @@ jobs:
           severity: 'HIGH,CRITICAL'
           ignore-unfixed: true
 
-      - name: Upload Trivy scan results to GitHub Security tab
+      - name: Upload Trivy scan results
         if: always()
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: 'trivy-results.sarif'
           category: 'trivy'
-        continue-on-error: true
-
-      - name: Run Trivy for PR comment
-        uses: aquasecurity/trivy-action@master
-        with:
-          scan-type: 'fs'
-          scan-ref: 'be-components'
-          format: 'table'
-          severity: 'HIGH,CRITICAL'
-          ignore-unfixed: true
-          output: 'trivy-table.txt'
 
 #  codeql-scan:
 #    runs-on: [self-hosted, x64]

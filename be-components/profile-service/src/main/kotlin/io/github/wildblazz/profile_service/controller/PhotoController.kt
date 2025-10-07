@@ -21,6 +21,7 @@ class PhotoController(private val photoService: PhotoService) {
         @PathVariable userId: String
     ): ResponseEntity<List<PhotoDto>> {
         val photos = photoService.getPhotosByProfileId(userId)
+
         return ResponseEntity.ok(photos)
     }
 

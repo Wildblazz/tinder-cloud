@@ -31,6 +31,7 @@ class PhotoController(private val photoService: PhotoService) {
         @RequestParam("file") file: MultipartFile,
     ): ResponseEntity<PhotoDto> {
         val photoDto = photoService.uploadPhoto(userId, file)
+
         return ResponseEntity.status(HttpStatus.CREATED).body(photoDto)
     }
 

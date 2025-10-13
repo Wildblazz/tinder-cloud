@@ -41,9 +41,10 @@ jobs:
           password: ${{ secrets.NEXUS_PASSWORD }}
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
-          context: ./be-components/${{ github.event.inputs.service }}
+          context: .
+          file: be-components/${{ github.event.inputs.service }}/Dockerfile
           push: ${{ github.event.inputs.push == 'true' }}
           tags: |
             ${{ github.event.inputs.service }}:${{ github.event.inputs.tag }}

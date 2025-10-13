@@ -35,7 +35,7 @@ jobs:
         if: ${{ github.event.inputs.push == 'true' }}
         uses: docker/login-action@v3
         with:
-          registry: ${{ secrets.NEXUS_URL }}
+          registry: ${{ vars.NEXUS_URL_LOCAL }}
           username: ${{ secrets.NEXUS_USERNAME }}
           password: ${{ secrets.NEXUS_PASSWORD }}
 

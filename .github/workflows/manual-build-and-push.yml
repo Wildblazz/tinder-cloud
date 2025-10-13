@@ -16,11 +16,10 @@ on:
       tag:
         description: "Tag for the Docker image"
         required: false
-        default: "latest"
       push:
         description: "Should push to Artifactory"
         type: boolean
-        default: true
+        default: false
 
 jobs:
   build-and-push:
@@ -47,6 +46,5 @@ jobs:
           file: be-components/${{ github.event.inputs.service }}/Dockerfile
           push: ${{ github.event.inputs.push == 'true' }}
           tags: |
-            ${{ github.event.inputs.service }}:${{ github.event.inputs.tag }}
-            ${{ github.event.inputs.push == 'true' && format('{0}/{1}:latest', secrets.NEXUS_URL, github.event.inputs.service) || '' }}
+            ${{ secrets.NEXUS_URL }}/${{ github.event.inputs.service }}:${{ github.event.inputs.tag || github.sha }}
           load: ${{ github.event.inputs.push == 'false' }}

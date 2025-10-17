@@ -48,3 +48,27 @@ jobs:
           tags: |
             ${{ vars.NEXUS_URL_LOCAL }}/${{ github.event.inputs.service }}:${{ github.event.inputs.tag || github.sha }}
           load: ${{ github.event.inputs.push == 'false' }}
+
+      - name: Checkout GitOps repository
+        if: ${{ github.event.inputs.push == 'true' }}
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ vars.TINDER_CLOUD_GITOPS_REPO }}
+          token: ${{ secrets.TINDER_CLOUD_GITOPS_PAT }}
+          path: gitops
+
+      - name: Update deployment manifest
+        if: ${{ github.event.inputs.push == 'true' }}
+        run: |
+          IMAGE_TAG="${{ github.event.inputs.tag || github.sha }}"
+          sed -i "s|image: .*${{ github.event.inputs.service }}:.*|image: testUrl/${{ github.event.inputs.service }}:${IMAGE_TAG}|" \
+            gitops/argocd/base/tinder-app/${{ github.event.inputs.service }}/deployment.yaml
+      - name: Commit and push changes
+        if: ${{ github.event.inputs.push == 'true' }}
+        working-directory: gitops
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add argocd/base/tinder-app/${{ github.event.inputs.service }}/deployment.yaml
+          git commit -m "Update ${{ github.event.inputs.service }} image to ${{ github.event.inputs.tag || github.sha }}"
+          git push

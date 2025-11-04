@@ -6,7 +6,7 @@ WORKDIR /project
 COPY be-components/ .
 RUN gradle :$APP_NAME:bootJar --no-daemon
 
-FROM openjdk:21-slim
+FROM openjdk:24-ea-21-slim
 ENV SERVER_PORT=8083
 ARG APP_NAME
 WORKDIR /app

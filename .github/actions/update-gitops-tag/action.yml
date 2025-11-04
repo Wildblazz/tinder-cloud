@@ -30,13 +30,13 @@ runs:
         repository: ${{ inputs.gitops-repo }}
         token: ${{ inputs.gitops-token }}
         ref: ${{ inputs.gitops-branch }}
+        path: gitops-repo
 
     - name: Update image tag
       shell: bash
       run: |
         chmod +x ${{ github.action_path }}/update.sh
-        ${{ github.action_path }}/update.sh "${{ inputs.service }}" "${{ inputs.tag }}" "${{ inputs.deployment-file-path }}"
-    
+        ${{ github.action_path }}/update.sh" "${{ inputs.service-name }}" "${{ inputs.image-tag }}" "gitops-repo/${{ inputs.deployment-file-path }}"
 
     - name: Commit and push changes
       shell: bash

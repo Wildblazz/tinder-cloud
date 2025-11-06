@@ -67,7 +67,7 @@ jobs:
       - name: Load image to Minikube
         if: ${{ github.event.inputs.push == 'local' }}
         run: |
-          docker exec minikube minikube image load ${{ github.event.inputs.service }}:${{ github.event.inputs.tag || github.sha }}
+          docker save ${{ github.event.inputs.service }}:${{ github.event.inputs.tag || github.sha }} | docker exec -i minikube docker load
 
       - name: Update GitOps repo
         uses: ./.github/actions/update-gitops-tag

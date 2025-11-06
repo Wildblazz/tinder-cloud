@@ -59,7 +59,7 @@ The system will implement these key dating platform capabilities:
 * Use instructions in the [README](https://github.com/Wildblazz/tinder-cloud-gitops/blob/main/README.md#quick-start)
 
 * Generate app images: 
-  * By script: `chmod +x deploy/eks/build-images.sh` and `./deploy/eks/build-images.sh`
+  * By script: `chmod +x deploy/scripts/build-images.sh` and `./deploy/scripts/build-images.sh`
   * Or manually:
     * Make images accessible inside minikube BEFORE image building: `eval $(minikube docker-env)`
     * profile-service:        `docker build -t profile-service:latest -f be-components/profile-service/Dockerfile .`

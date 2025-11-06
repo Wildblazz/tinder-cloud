@@ -17,9 +17,12 @@ on:
         description: "Tag for the Docker image"
         required: false
       push:
-        description: "Should push to Artifactory"
-        type: boolean
-        default: false
+        description: "Should load to the local Docker daemon or push to the external Artifactory"
+        required: true
+        type: choice
+        options:
+          - local
+          - external
 
 jobs:
   build-and-push:
@@ -32,25 +35,41 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Login to Nexus Docker registry
-        if: ${{ github.event.inputs.push == 'true' }}
+        if: ${{ github.event.inputs.push == 'external' }}
         uses: docker/login-action@v3
         with:
           registry: ${{ vars.NEXUS_URL_LOCAL }}
           username: ${{ secrets.NEXUS_USERNAME }}
           password: ${{ secrets.NEXUS_PASSWORD }}
 
-      - name: Build and push Docker image
+      - name: Build image and push to external artifactory
+        if: ${{ github.event.inputs.push == 'external' }}
         uses: docker/build-push-action@v6
         with:
           context: .
           file: be-components/${{ github.event.inputs.service }}/Dockerfile
-          push: ${{ github.event.inputs.push == 'true' }}
+          push: true
           tags: |
             ${{ vars.NEXUS_URL_LOCAL }}/${{ github.event.inputs.service }}:${{ github.event.inputs.tag || github.sha }}
-          load: ${{ github.event.inputs.push == 'false' }}
+          load: false
+
+      - name: Build image and load to the Docker daemon
+        uses: docker/build-push-action@v6
+        if: ${{ github.event.inputs.push == 'local' }}
+        with:
+          context: .
+          file: be-components/${{ github.event.inputs.service }}/Dockerfile
+          push: false
+          tags: |
+            ${{ github.event.inputs.service }}:${{ github.event.inputs.tag || github.sha }}
+          load: true
+
+      - name: Load image to Minikube
+        if: ${{ github.event.inputs.push == 'local' }}
+        run: |
+          docker save ${{ github.event.inputs.service }}:${{ github.event.inputs.tag || github.sha }} | docker exec -i minikube docker load
 
       - name: Update GitOps repo
-        if: ${{ github.event.inputs.push == 'true' }}
         uses: ./.github/actions/update-gitops-tag
         with:
           service-name: ${{ github.event.inputs.service }}

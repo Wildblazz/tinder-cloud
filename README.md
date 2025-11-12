@@ -5,6 +5,10 @@ Tinder-Cloud is a backend-focused replication of Tinder's core functionality, de
 This project maintains focus on distributed systems challenges.
 Note: This project is strictly educational in nature and intended solely for learning purposes, not for commercial use or public deployment.
 
+### Architecture
+- [Link to architecture documentation](docs/architecture/high-level.md)
+- <a href="/docs/architecture/high-level-cloud-architecture-1.eraserdiagram" data-element-id="Eho4AljltyBMTzARm7xV0"><img src="/.eraser/4wgZFFj3vFgristM8iP4___1PC2Z3FLoVY1RStR2M9qaWJj2Yr1___---diagram----96973410c27f931c620674109d830973.png" alt="" data-element-id="Eho4AljltyBMTzARm7xV0" /></a>
+
 ### Project Purpose
 This project serves as a practical platform to refine expertise in:
 
@@ -40,11 +44,6 @@ The system will implement these key dating platform capabilities:
 * Caching: Redis for optimizing recommendation delivery
 * Infrastructure: Container-based deployment (Docker/Kubernetes)
 * CI/CD: GitHub Actions
-
-### Architecture
-
-- [Link to architecture documentation](docs/architecture/high-level.md)
-- <a href="/docs/architecture/high-level-cloud-architecture-1.eraserdiagram" data-element-id="Eho4AljltyBMTzARm7xV0"><img src="/.eraser/4wgZFFj3vFgristM8iP4___1PC2Z3FLoVY1RStR2M9qaWJj2Yr1___---diagram----96973410c27f931c620674109d830973.png" alt="" data-element-id="Eho4AljltyBMTzARm7xV0" /></a>
 
 ### Local start in docker
 * Create `.env` file in the 'deploy/docker' directory. Use `.env-example` as a reference

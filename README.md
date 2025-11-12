@@ -44,6 +44,7 @@ The system will implement these key dating platform capabilities:
 ### Architecture
 
 - [Link to architecture documentation](docs/architecture/high-level.md)
+- <a href="/docs/architecture/high-level-cloud-architecture-1.eraserdiagram" data-element-id="Eho4AljltyBMTzARm7xV0"><img src="/.eraser/4wgZFFj3vFgristM8iP4___1PC2Z3FLoVY1RStR2M9qaWJj2Yr1___---diagram----96973410c27f931c620674109d830973.png" alt="" data-element-id="Eho4AljltyBMTzARm7xV0" /></a>
 
 ### Local start in docker
 * Create `.env` file in the 'deploy/docker' directory. Use `.env-example` as a reference
